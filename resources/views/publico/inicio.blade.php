@@ -98,14 +98,15 @@
                 <tbody>
                     @foreach ($departamentos->sortByDesc('generacion_kwh') as $d)
                         @php [$g, $gu] = Formato::energia($d['generacion_kwh']); $q = $d['generacion_kwh'] > 0 ? EstadisticasService::quintil($d['generacion_kwh'], $cortesDeptos) : 0; @endphp
-                        <tr class="{{ $d['granjas'] === 0 ? 'text-ink-3' : '' }}">
+                        @php $sinGranjas = $d['granjas'] === 0; @endphp
+                        <tr class="{{ $sinGranjas ? 'text-ink-3' : '' }}">
                             <td>@if($q)<span class="sw q{{ $q }}"></span>@else<span class="sw" style="background:transparent"></span>@endif{{ $d['nombre'] }}</td>
-                            <td class="num">{{ Formato::numero($d['granjas']) }}</td>
-                            <td class="num">{{ Formato::numero($d['paneles']) }}</td>
-                            <td class="num">{{ Formato::numero($d['capacidad_instalada_kw']) }}</td>
-                            <td class="num">{{ $g }}<span class="unidad">{{ $gu }}</span></td>
-                            <td class="num">{{ Formato::numero($d['familias_beneficiadas']) }}</td>
-                            <td class="num">{{ Formato::numero($d['co2_evitado_kg']) }}<span class="unidad">kg</span> <span class="text-ink-3">{{ Formato::co2Toneladas($d['co2_evitado_kg']) }} t</span></td>
+                            <td class="num">{{ $sinGranjas ? '—' : Formato::numero($d['granjas']) }}</td>
+                            <td class="num">{{ $sinGranjas ? '—' : Formato::numero($d['paneles']) }}</td>
+                            <td class="num">{{ $sinGranjas ? '—' : Formato::numero($d['capacidad_instalada_kw']) }}</td>
+                            <td class="num">@if($sinGranjas)—@else{{ $g }}<span class="unidad">{{ $gu }}</span>@endif</td>
+                            <td class="num">{{ $sinGranjas ? '—' : Formato::numero($d['familias_beneficiadas']) }}</td>
+                            <td class="num">@if($sinGranjas)—@else{{ Formato::numero($d['co2_evitado_kg']) }}<span class="unidad">kg</span> <span class="text-ink-3">{{ Formato::co2Toneladas($d['co2_evitado_kg']) }} t</span>@endif</td>
                             <td class="num {{ $d['alertas_activas'] > 0 ? 'desv-alerta' : '' }}">{{ $d['alertas_activas'] ?: '—' }}</td>
                             <td><x-sparkline :valores="$series[$d['id']] ?? []" /></td>
                         </tr>
