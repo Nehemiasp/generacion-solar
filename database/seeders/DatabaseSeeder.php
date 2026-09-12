@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
     {
         User::updateOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@solar.gt')],
-            ['name' => 'Administrador', 'password' => env('ADMIN_PASSWORD', 'password')],
+            ['name' => 'Administrador', 'password' => env('ADMIN_PASSWORD', 'Solar2026Gt')],
         );
 
         $this->call([DepartamentoSeeder::class, DemoSeeder::class]);

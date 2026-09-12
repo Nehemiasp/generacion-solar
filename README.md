@@ -117,7 +117,7 @@ en otra terminal.
 
 | Correo | Contraseña |
 |---|---|
-| `admin@solar.gt` | `password` |
+| `admin@solar.gt` | `Solar2026Gt` |
 
 Se crean con el seeder y se pueden cambiar con `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el `.env`.
 
