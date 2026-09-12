@@ -1,40 +1,48 @@
-# Plan de ataque — Competencia de Programación con IA
+# Plan de desarrollo
+
 **Sistema de Registro y Monitoreo de Generación Solar por Departamento**
-Ejecución con Claude Code · 11–12 de septiembre de 2026
+Instrucciones de trabajo para Claude Code · Competencia de Programación con IA, 11–12 de septiembre de 2026
+
+Este documento fija lo que se construye y en qué orden. Las decisiones de la sección 0 y el esquema
+de la sección 2 no se reabren: si algo del plan no se puede cumplir tal cual, se reporta y se
+propone la alternativa antes de cambiarlo.
+
+> **Desviaciones registradas durante la ejecución:** base de datos MySQL 8.4 en producción en lugar
+> de PostgreSQL (costo del recurso en Laravel Cloud); mosaicos de Esri en lugar de OpenStreetMap/CARTO
+> (ver `DISENO.md`, sección 15); frontend público en vistas Blade propias en lugar de widgets de
+> Filament, para poder cumplir el sistema de diseño. Todas se documentaron en `USO-DE-IA.md`.
 
 ---
 
-## 0. Decisiones tomadas (no las reabras)
-
-Cada decisión que se queda abierta te cuesta 20 minutos. Estas ya están cerradas:
+## 0. Decisiones tomadas
 
 | Pieza | Decisión | Por qué |
 |---|---|---|
 | Framework | Laravel 13 (PHP 8.3+) | Obligatorio por bases |
-| Panel admin / CRUD | **Filament** | Regala RF-01→RF-09 y RF-17 casi completos |
-| Base de datos | **PostgreSQL** | Laravel Cloud y Railway lo dan gratis y ya provisionado |
-| Mapa | **Leaflet + OpenStreetMap** | Sin API key, sin tarjeta, sin billing |
-| Gráficas | Chart.js (vía widgets de Filament) | Ya viene integrado en Filament |
+| Panel admin / CRUD | **Filament** | Cubre RF-01→RF-09 y RF-17 casi completos |
+| Base de datos | **PostgreSQL** (SQLite en local) | Laravel Cloud y Railway lo provisionan |
+| Mapa | **Leaflet** con mosaicos sin clave de API | Sin tarjeta, sin facturación |
+| Gráficas | Chart.js | Ligero, sin dependencias de servidor |
 | API | Laravel `apiResource` + API Resources | Nativo |
-| Doc API | `dedoc/scramble` (OpenAPI automático) | Genera la doc leyendo tus controladores |
-| Deploy | **Laravel Cloud** (plan B: Railway) | Deploy nativo Laravel + Postgres incluido |
-| Auth | Filament panel autenticado; dashboard público sin login | Evita fricción al evaluar |
+| Doc API | `dedoc/scramble` (OpenAPI automático) | Genera la documentación leyendo los controladores |
+| Deploy | **Laravel Cloud** (plan B: Railway) | Deploy nativo de Laravel con base de datos incluida |
+| Auth | Panel autenticado; tablero público sin login | Evita fricción al evaluar |
 
-> Si Filament 5 da problemas de compatibilidad en el momento de instalar, bajá a la major anterior sin discutir. No pierdas tiempo peleando versiones.
+Si Filament 5 da problemas de compatibilidad al instalar, usar la major anterior sin más discusión.
+
+Dos prioridades transversales:
+
+1. **Deploy temprano.** La URL pública debe existir antes de escribir lógica de negocio; después,
+   cada fase termina con `git push` y despliegue automático.
+2. **Datos de demostración con historia.** Alimentan a la vez el tablero, el mapa, las alertas y la
+   proyección; un seeder pobre arruina los cuatro. Se les dedica una fase propia con parámetros
+   exactos.
 
 ---
 
-## 1. Regla de oro del día
+## 1. Esquema de base de datos
 
-**Deploy vacío en la primera hora.** El 80% de los equipos pierde la competencia por intentar desplegar a las 11 PM. Vos vas a tener la URL pública funcionando cuando la app todavía diga "Laravel". Después, cada fase termina con `git push` y deploy automático.
-
-Segunda regla: **los datos de demo valen 4 criterios de la rúbrica a la vez** (dashboard, mapa, alertas, proyección). Un seeder pobre hunde los cuatro. Presupuestá tiempo real para esto, no lo dejes de último.
-
----
-
-## 2. Esquema de base de datos (definido, no improvisado)
-
-Esto es lo único que NO debe inventar la IA. Es la columna vertebral; si está mal, todo lo demás se tuerce.
+Es lo único que la IA no diseña: se implementa tal cual. Nombres en español.
 
 ```
 departamentos
@@ -103,7 +111,7 @@ alertas                                       // RF-14
   index(estado)
 ```
 
-**Reglas de cálculo (van en `config/solar.php`, nunca hardcodeadas):**
+**Reglas de cálculo (van en `config/solar.php`, nunca escritas a mano en otro archivo):**
 
 ```php
 return [
@@ -113,23 +121,25 @@ return [
 ];
 ```
 
-**Valores derivados — atributos calculados, NUNCA columnas:**
+**Valores derivados — atributos calculados, nunca columnas:**
+
 - `capacidad_instalada_kw` = `SUM(granja_panel.cantidad × modelos_panel.potencia_kw)` (RF-06)
 - `co2_evitado_kg` = `generacion_acumulada_kwh × 0.40` (RF-10)
 - `porcentaje_desviacion` = `(real − esperada) / esperada × 100`
 
-Si un evaluador pregunta "¿por qué no guardaste la capacidad en la tabla?" la respuesta es: *es un dato derivado, guardarlo introduce riesgo de desincronización cuando cambian los paneles*. Esa respuesta suma en "calidad de arquitectura".
+Guardarlos como columnas introduce riesgo de desincronización cada vez que cambian los paneles de
+una granja; por eso se resuelven con accessors o scopes con subconsultas.
 
 ---
 
-## 3. Archivo `CLAUDE.md` (créalo ANTES de escribir código)
+## 2. Archivo `CLAUDE.md`
 
-Esto es lo que hace que Claude Code trabaje bien todo el día en vez de irse por la tangente. Pegalo en la raíz del proyecto:
+Se crea en la raíz antes de escribir código y se respeta en todas las fases:
 
 ```markdown
 # Proyecto: Sistema de Generación Solar Guatemala
 
-Competencia de 1 día. Laravel 13 + Filament + PostgreSQL + Leaflet.
+Laravel 13 + Filament + PostgreSQL + Leaflet.
 
 ## Reglas no negociables
 - Idioma del dominio: ESPAÑOL. Tablas, modelos, campos y rutas en español
@@ -159,14 +169,15 @@ Competencia de 1 día. Laravel 13 + Filament + PostgreSQL + Leaflet.
 
 ---
 
-## 4. Cronograma por fases
+## 3. Fases
 
-Cada fase = un contexto limpio en Claude Code (`/clear` entre fases) + un commit + un push.
-Usá **plan mode** (Shift+Tab dos veces) antes de arrancar cada fase: dejá que proponga el plan, corregilo, y recién ahí lo dejás ejecutar.
+Cada fase se ejecuta en un contexto limpio, con un objetivo, y termina con un commit y un push.
+Antes de escribir código en cada fase, proponer el plan de cambios y esperar confirmación.
+Al terminar, reportar qué se ejecutó y qué salida se obtuvo.
 
 ---
 
-### FASE 0 — Andamiaje y deploy vacío · 60 min
+### FASE 0 — Andamiaje y deploy vacío
 
 **Objetivo:** URL pública viva antes de escribir lógica.
 
@@ -181,20 +192,19 @@ git init && git add . && git commit -m "chore: proyecto inicial"
 ```
 
 Luego, en Laravel Cloud (o Railway):
-1. Conectar el repo de GitHub.
-2. Provisionar PostgreSQL (se inyectan las variables solo).
-3. Configurar comando de build/deploy: `php artisan migrate --force`.
+
+1. Conectar el repositorio de GitHub.
+2. Provisionar la base de datos (las variables se inyectan solas).
+3. Configurar el comando de despliegue: `php artisan migrate --force`.
 4. Verificar que la URL carga.
 
-**No sigas a la Fase 1 hasta que la URL pública responda.**
+No se pasa a la Fase 1 hasta que la URL pública responda.
 
 ---
 
-### FASE 1 — Modelo de datos · 60 min
+### FASE 1 — Modelo de datos
 
-Prompt para Claude Code:
-
-> Creá las migraciones, modelos Eloquent y factories para este esquema exacto. No agregues campos que no estén listados ni cambies nombres. [pegar el esquema de la sección 2]
+> Creá las migraciones, modelos Eloquent y factories para este esquema exacto. No agregues campos que no estén listados ni cambies nombres. [esquema de la sección 1]
 >
 > Además:
 > - `config/solar.php` con factor_co2_kg_por_kwh = 0.40, umbral_alerta = 0.80, meses_historicos_proyeccion = 12.
@@ -204,13 +214,12 @@ Prompt para Claude Code:
 > - Seeder `DepartamentoSeeder` con los 22 departamentos de Guatemala reales, con su cabecera y coordenadas del centroide.
 > - Corré `php artisan migrate:fresh --seed` y mostrame la salida.
 
-**Verificá vos mismo:** entrá a `php artisan tinker` y comprobá que los 22 departamentos están y que las coordenadas caen dentro de Guatemala (lat 13.7–17.8, lon −92.2 a −88.2). Es un error clásico que invente coordenadas de otro país.
+**Criterio de aceptación:** en `php artisan tinker`, los 22 departamentos existen y todas las
+coordenadas caen dentro de Guatemala (lat 13.7–17.8, lon −92.2 a −88.2). Reportar la comprobación.
 
 ---
 
-### FASE 2 — CRUDs en Filament · 90 min
-
-Prompt:
+### FASE 2 — CRUDs en Filament
 
 > Generá los recursos de Filament para ModeloPanel, Granja y Generacion.
 >
@@ -221,11 +230,12 @@ Prompt:
 >
 > Validaciones (RF-17): campos obligatorios, numéricos no negativos, latitud entre -90 y 90, longitud entre -180 y 180, período único por granja, cantidad de paneles >= 1. Mensajes de error en español.
 
+**Criterio de aceptación:** crear una granja con dos modelos de panel desde el panel y ver la
+capacidad total calculada en su ficha.
+
 ---
 
-### FASE 3 — Alertas · 45 min
-
-Prompt:
+### FASE 3 — Alertas
 
 > Implementá la regla de alertas (RF-14):
 >
@@ -235,15 +245,14 @@ Prompt:
 > - Comando artisan `solar:evaluar-alertas` que recorre todas las generaciones y reconstruye las alertas, para poder regenerarlas tras cargar datos masivos.
 > - Escribí un test que confirme: 79% dispara alerta, 80% dispara alerta (el requisito dice "al menos 20% por debajo", o sea <= 80% es alerta), 81% no dispara.
 
-Ese caso borde del 80% exacto es exactamente el tipo de cosa que un evaluador prueba. Tenelo resuelto y sabé defenderlo.
+**Criterio de aceptación:** los tres casos del test pasan. El caso borde del 80 % exacto queda
+documentado en el README.
 
 ---
 
-### FASE 4 — Dashboard y reportes · 90 min
+### FASE 4 — Tablero y reportes
 
-Prompt:
-
-> Construí el dashboard de Filament con estos widgets, todos alimentados por consultas agregadas (nada de cargar colecciones completas en memoria):
+> Construí el tablero con estos componentes, todos alimentados por consultas agregadas (nada de cargar colecciones completas en memoria):
 >
 > **Stats nacionales:** total de granjas, total de paneles instalados, capacidad instalada total en kW, generación acumulada en kWh, total de familias beneficiadas, CO2 evitado en kg y en toneladas.
 >
@@ -257,35 +266,35 @@ Prompt:
 >
 > Todos los números formateados con separador de miles y las unidades visibles.
 
+**Criterio de aceptación:** las cifras del tablero coinciden con las que devuelve una consulta SQL
+directa sobre los datos cargados.
+
 ---
 
-### FASE 5 — Mapa interactivo · 60 min
+### FASE 5 — Mapa interactivo
 
-Prompt:
-
-> Creá una página `/mapa` (pública, sin login) con Leaflet y tiles de OpenStreetMap:
+> Creá una página `/mapa` (pública, sin login) con Leaflet y mosaicos sin clave de API:
 >
 > - Centrada en Guatemala, zoom inicial que muestre todo el país.
-> - Un marcador por cada granja activa, con color distinto según departamento (paleta generada a partir del id del departamento, consistente entre recargas).
-> - Popup al hacer clic: nombre de la granja, departamento, municipio, capacidad instalada kW, generación acumulada kWh, familias beneficiadas, CO2 evitado kg, y badge si tiene alerta activa.
+> - Un marcador por cada granja activa, con tamaño según capacidad instalada y color según generación acumulada, siguiendo la escala de `DISENO.md`.
+> - Popup al hacer clic: nombre de la granja, departamento, municipio, capacidad instalada kW, generación acumulada kWh, familias beneficiadas, CO2 evitado kg, y distintivo si tiene alerta activa.
 > - Filtro lateral por departamento que oculta/muestra marcadores sin recargar.
-> - Leyenda de colores.
-> - Los datos se consumen desde `/api/v1/granjas/mapa` (GeoJSON o JSON plano), no embebidos en el Blade.
-> - Responsive: en móvil el filtro colapsa y el mapa ocupa el alto completo.
-> - Usá marker clustering si hay más de 30 marcadores.
+> - Leyenda.
+> - Los datos se consumen desde `/api/v1/granjas/mapa`, no embebidos en el Blade.
+> - Responsive: en móvil el filtro se apila sobre el mapa.
 
-**Este es tu criterio.** "Mapa interactivo y experiencia de usuario" es una línea entera de la rúbrica y es donde tenés ventaja sobre el resto. Invertí 20 minutos extra en que se vea pulido: tipografía decente, popups con jerarquía visual clara, estados hover. No lo dejes con el look default de Bootstrap.
+**Criterio de aceptación:** el mapa es parte de la rúbrica ("mapa interactivo y experiencia de
+usuario"), así que se revisa contra `DISENO.md`: tipografía, jerarquía del popup, estados hover.
+Nada con el aspecto por defecto de Leaflet.
 
 ---
 
-### FASE 6 — Proyección · 45 min
+### FASE 6 — Proyección
 
 **Método elegido: regresión lineal por mínimos cuadrados sobre los últimos 12 períodos.**
 
-Justificación para defender (memorizala):
+Justificación:
 > Los datos de generación mensual tienen tendencia y ruido, con muy pocos puntos por granja. Una regresión lineal simple captura la tendencia sin sobreajustar, es determinista, no requiere entrenamiento ni dependencias externas, y cada coeficiente es explicable. Un modelo de ML con 12 puntos por granja sobreajustaría sin aportar precisión real. Cuando hay menos de 3 períodos, el sistema cae a promedio móvil, porque una recta con dos puntos no es una tendencia.
-
-Prompt:
 
 > Creá `App\Services\ProyeccionService` con:
 > - `proyectar(Granja $granja, int $meses = 3): array` — regresión lineal por mínimos cuadrados sobre los últimos `config('solar.meses_historicos_proyeccion')` períodos. Devuelve los meses proyectados con su valor, la pendiente, el intercepto y el R².
@@ -295,11 +304,12 @@ Prompt:
 > - Widget en la ficha de granja: gráfica con histórico (línea sólida) + proyección a 3 meses (línea punteada), y una tabla de precisión histórica del modelo.
 > - Tests con una serie perfectamente lineal (debe proyectar exacto) y con una serie plana.
 
+**Criterio de aceptación:** los tests pasan y la ficha de una granja muestra los tres meses
+proyectados con la precisión histórica.
+
 ---
 
-### FASE 7 — API REST + documentación · 45 min
-
-Prompt:
+### FASE 7 — API REST y documentación
 
 > Implementá la API REST versionada bajo `/api/v1` con API Resources:
 >
@@ -316,11 +326,14 @@ Prompt:
 >
 > Además generá `docs/API.md` con tabla de endpoints, parámetros y un ejemplo de respuesta por cada uno, por si la doc interactiva falla en producción.
 
+**Criterio de aceptación:** cada endpoint probado con `curl`, incluidos los casos 404 y 422, con el
+código de estado y la forma de la respuesta reportados.
+
 ---
 
-### FASE 8 — Datos de demostración · 45 min
+### FASE 8 — Datos de demostración
 
-**No delegues los parámetros. Decíselos exactos:**
+Los parámetros son exactos; no se dejan a criterio del seeder.
 
 > Creá `DemoSeeder` que genere datos realistas:
 > - 8 modelos de panel de marcas reales (Jinko, Trina, Canadian Solar, LONGi...) con potencias entre 0.35 y 0.7 kW.
@@ -333,94 +346,78 @@ Prompt:
 > - Familias beneficiadas proporcional a la capacidad instalada, entre 80 y 3500.
 > - Al final corré `solar:evaluar-alertas` y mostrame cuántas alertas se generaron.
 
-Después corré `migrate:fresh --seed` **en producción** y revisá el dashboard con ojos de evaluador.
+**Criterio de aceptación:** `migrate:fresh --seed` corre limpio en local y en producción; el
+tablero, el mapa, las alertas y las proyecciones se ven poblados.
 
 ---
 
-### FASE 9 — Pulido, documentación y presentación · 90 min
+### FASE 9 — Pulido, documentación y presentación
 
-- `README.md`: descripción, stack, requisitos, instalación local paso a paso, comandos artisan propios, credenciales de acceso demo, URL pública, link al repo.
-- `docs/USO-DE-IA.md`: entregable obligatorio. Qué herramienta usaste (Claude Code), en qué fases, qué revisaste y corregiste manualmente, y qué decisiones tomaste vos y no la IA (el esquema de datos, el método de proyección, el stack). **Este documento juega a tu favor: demuestra control, que es literalmente lo que pide la sección 15 del reto.**
-- Revisar que `.env` no esté en el repo y que `.env.example` sí.
-- Probar la app en un teléfono real. El requisito dice adaptable a distintos tamaños de pantalla.
-- Presentación: 10–12 slides.
+- `README.md`: descripción, objetivos, stack, requisitos, instalación local paso a paso, comandos
+  artisan propios, credenciales de acceso demo, URL pública, enlace al repositorio, modelo de datos.
+- `docs/USO-DE-IA.md`: entregable obligatorio. Qué herramienta se usó, en qué fases, qué se revisó y
+  corrigió manualmente, y qué decisiones tomó el equipo y no la IA (el esquema de datos, el método de
+  proyección, el stack).
+- Revisar que `.env` no esté en el repositorio y que `.env.example` sí.
+- Verificar la aplicación en un viewport de 375 px: sin scroll horizontal, navegación usable.
+- Presentación de 10–12 diapositivas con notas del orador.
 
 **Guion de la presentación:**
-1. Problema y alcance (1 slide)
-2. Arquitectura y modelo de datos (1 slide con el diagrama ER)
-3. Demo en vivo: CRUD → dashboard → mapa → alerta → proyección (5–6 min)
-4. Método de proyección y su justificación (1 slide)
-5. API REST y documentación (1 slide)
-6. Uso de IA: cómo la dirigiste y qué controlaste vos (1 slide)
+
+1. Problema y alcance
+2. Arquitectura y modelo de datos (diagrama ER)
+3. Demo en vivo: CRUD → tablero → mapa → alerta → proyección
+4. Método de proyección y su justificación
+5. API REST y documentación
+6. Uso de IA: cómo se dirigió y qué controló el equipo
 7. Cierre: métricas del sistema
 
 ---
 
-## 5. Cómo trabajar con Claude Code (esto define tu velocidad)
+## 4. Reglas de trabajo para el agente
 
-**Hacé:**
-- Plan mode antes de cada fase. Leé el plan, corregilo, después ejecutá.
-- `/clear` entre fases. Contexto sucio = alucinaciones.
-- Un commit por fase. Si algo explota, `git reset --hard` y volvés a intentar en vez de perder 40 minutos depurando código que no entendés.
-- Pedile que **ejecute y muestre la salida**. "Listo, ya funciona" sin output no es evidencia.
-- Cuando algo falle dos veces seguidas, parás y leés el código vos. La tercera iteración casi nunca la arregla.
-
-**No hagas:**
-- No le des dos fases juntas. Una fase, un objetivo.
-- No aceptes que invente sintaxis de Filament de memoria. Es la fuente #1 de errores silenciosos.
-- No lo dejes tocar migraciones ya aplicadas en producción sin avisarte.
-- No pidas "hacelo bonito" sin referencia. Dale colores, tipografía y espaciado concretos.
-
-**Reparto entre los dos:**
-Vos: Fases 0, 5, 8, 9 (deploy, mapa, datos de demo, presentación y pulido visual).
-Tu compañero: Fases 1, 2, 3, 7 (modelo, CRUDs, alertas, API).
-Fases 4 y 6 en conjunto.
-Trabajen en ramas separadas y mergeen al terminar cada fase, o coordinen para no tocar los mismos archivos al mismo tiempo.
-
-> Ojo con la regla 2 de la competencia: **ambos deben poder explicar la solución.** Reserven 20 minutos antes de la entrega para que cada uno le explique al otro la parte que no hizo. Van a preguntar.
+- Una fase por vez, un objetivo por fase. No combinar fases.
+- Proponer el plan de cambios antes de ejecutar; ejecutar solo tras confirmación.
+- Ejecutar y mostrar la salida. "Listo, ya funciona" sin salida no cuenta como evidencia.
+- No inventar sintaxis de Filament: verificar contra `vendor/filament` o un archivo generado por
+  `make:`.
+- No tocar migraciones ya aplicadas en producción sin avisar.
+- Ante una instrucción de estilo, aplicar `DISENO.md`; no improvisar colores, tipografía ni
+  espaciados.
+- Si algo falla dos veces seguidas, detenerse y explicar la causa en lugar de intentar una tercera
+  variante.
 
 ---
 
-## 6. Checklist final contra los requerimientos
+## 5. Lista de verificación contra los requerimientos
 
-Antes de entregar, verificá cada uno **en la URL de producción**, no en local:
+Se comprueba cada uno **en la URL de producción**, no en local:
 
-- [ ] RF-01 — 22 departamentos cargados y asociables
-- [ ] RF-02 — CRUD de modelos de panel con marca, modelo, potencia kW, estado
-- [ ] RF-03 — Crear, editar, consultar y **desactivar** granjas
-- [ ] RF-04 — Latitud y longitud almacenadas y visibles en el mapa
-- [ ] RF-05 — Paneles asociados a granja con cantidad
-- [ ] RF-06 — Capacidad instalada calculada automáticamente
-- [ ] RF-07 — Familias beneficiadas por granja
-- [ ] RF-08 — Generación real por período en kWh
-- [ ] RF-09 — Generación esperada comparable con la real
-- [ ] RF-10 — CO2 con factor 0.40 kg/kWh
-- [ ] RF-11 — Dashboard con indicadores nacionales y por departamento
-- [ ] RF-12 — Reporte por departamento con las 6 métricas mínimas
-- [ ] RF-13 — Mapa con marcadores, selección e info de granja
-- [ ] RF-14 — Alerta cuando real <= 80% de esperada
-- [ ] RF-15 — Proyección implementada, documentada y justificada
-- [ ] RF-16 — API REST con departamentos, granjas, generación y estadísticas
-- [ ] RF-17 — Validaciones de obligatorios, rangos y relaciones
+- [x] RF-01 — 22 departamentos cargados y asociables
+- [x] RF-02 — CRUD de modelos de panel con marca, modelo, potencia kW, estado
+- [x] RF-03 — Crear, editar, consultar y **desactivar** granjas
+- [x] RF-04 — Latitud y longitud almacenadas y visibles en el mapa
+- [x] RF-05 — Paneles asociados a granja con cantidad
+- [x] RF-06 — Capacidad instalada calculada automáticamente
+- [x] RF-07 — Familias beneficiadas por granja
+- [x] RF-08 — Generación real por período en kWh
+- [x] RF-09 — Generación esperada comparable con la real
+- [x] RF-10 — CO2 con factor 0.40 kg/kWh
+- [x] RF-11 — Tablero con indicadores nacionales y por departamento
+- [x] RF-12 — Reporte por departamento con las 6 métricas mínimas
+- [x] RF-13 — Mapa con marcadores, selección e información de granja
+- [x] RF-14 — Alerta cuando real <= 80% de esperada
+- [x] RF-15 — Proyección implementada, documentada y justificada
+- [x] RF-16 — API REST con departamentos, granjas, generación y estadísticas
+- [x] RF-17 — Validaciones de obligatorios, rangos y relaciones
 
 **Entregables:**
-- [ ] URL pública funcionando
-- [ ] Link de GitHub accesible
-- [ ] BD relacional (PostgreSQL)
-- [ ] README con instalación y ejecución
-- [ ] Documentación de la API
-- [ ] Documento de uso de IA
-- [ ] Datos de demo suficientes (dashboard poblado, mapa lleno, alertas visibles, proyecciones con forma)
-- [ ] Presentación lista
 
----
-
-## 7. Plan de contingencia
-
-Si a las 6 PM del día 12 vas atrasado, este es el orden de sacrificio:
-
-1. **Primero se cae:** tests, comparación proyección-vs-real, clustering de marcadores, filtros avanzados.
-2. **Después:** estilizado fino del mapa, gráfica de tendencia nacional.
-3. **Nunca se cae:** deploy funcionando, mapa con marcadores, dashboard con los totales, alertas visibles, un valor de proyección en pantalla, API con 4 endpoints, datos de demo.
-
-Una app desplegada al 80% gana contra una app perfecta en localhost. Siempre.
+- [x] URL pública funcionando
+- [x] Repositorio de GitHub accesible
+- [x] Base de datos relacional
+- [x] README con instalación y ejecución
+- [x] Documentación de la API
+- [x] Documento de uso de IA
+- [x] Datos de demostración suficientes (tablero poblado, mapa lleno, alertas visibles, proyecciones con forma)
+- [x] Presentación lista

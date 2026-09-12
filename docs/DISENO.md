@@ -204,7 +204,7 @@ Todo lo que viene por defecto en Chart.js grita plantilla. Configuración obliga
 
 ## 9. Estados vacíos y de carga
 
-Esto es lo que la IA nunca hace sola y lo que hace que un evaluador piense "aquí hubo un diseñador". Son obligatorios en: mapa filtrado sin resultados, lista de alertas, reporte por departamento, y proyección de una granja sin histórico suficiente.
+Los estados vacíos se diseñan, no se dejan en blanco: son lo que distingue una interfaz cuidada de una generada por defecto. Son obligatorios en: mapa filtrado sin resultados, lista de alertas, reporte por departamento, y proyección de una granja sin histórico suficiente.
 
 Redacción: voz activa, sin disculpas, sin signos de admiración, y siempre diciendo qué hacer.
 

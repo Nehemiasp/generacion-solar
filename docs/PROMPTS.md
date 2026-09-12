@@ -11,7 +11,7 @@ Los prompts de las siete fases de construcción se redactaron en la etapa de pre
 
 > Adjunto las bases del reto. Antes de escribir código necesito dos documentos de trabajo. Primero, un
 > plan de desarrollo: esquema de base de datos cerrado, con tablas, columnas y restricciones; fases de
-> trabajo con tiempo estimado; el prompt que le daré a la IA en cada fase; y criterios de aceptación
+> trabajo; el prompt que le daré a la IA en cada fase; y criterios de aceptación
 > por fase. Las tablas y campos van en español. Los valores derivados (capacidad instalada, generación
 > acumulada, CO₂ evitado) no se guardan como columnas: se calculan.
 >
