@@ -22,15 +22,3 @@ aplicación y del repositorio en la última diapositiva.
 El guion sugerido reserva cinco o seis minutos para la demostración en vivo, entre las diapositivas 4
 y 9: crear una generación por debajo del umbral y ver aparecer la alerta sola es el momento más
 convincente.
-
-## Regenerar
-
-Las diapositivas se generan con un script, así que se pueden rehacer con datos actualizados:
-
-```bash
-npm install pptxgenjs
-node generar-presentacion.js
-```
-
-Las capturas de pantalla que usa el archivo (`c_*.png`) se recortan de `docs/capturas/`. Para
-actualizarlas hay que volver a capturar la aplicación y recortar las mismas regiones.
