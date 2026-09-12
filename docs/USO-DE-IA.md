@@ -9,6 +9,28 @@ corrigió a mano, y qué decisiones tomó el equipo y no la IA.
 agente que lee y escribe archivos, corre comandos y ejecuta las pruebas, así que cada cambio se
 verificó ejecutándolo, no solo leyéndolo.
 
+Se usó dentro de la aplicación de escritorio de Claude, que integra terminal, navegador y control
+de versiones en la misma sesión, así que la IA pudo editar, ejecutar, abrir la aplicación y hacer
+commit sin cambiar de herramienta.
+
+## Servidores MCP utilizados
+
+Además de los archivos y la terminal, el agente se conectó a estos servidores MCP (Model Context
+Protocol) para verificar el resultado en un navegador real:
+
+| Servidor MCP | Para qué se usó |
+|---|---|
+| **Claude in Chrome** | Recorrer el panel de administración desplegado con la sesión del equipo ya iniciada: escritorio, granjas, generaciones, alertas y formularios. La IA nunca escribió la contraseña; usó la sesión abierta en el navegador del equipo |
+| **Navegador integrado** (Claude Browser) | Emular un viewport de 375 × 812 sobre la URL de producción, abrir el menú móvil, medir `scrollWidth` contra `clientWidth` y leer la consola en busca de errores. Así se detectó el desborde de las cifras del tablero |
+
+Ambos permitieron que la verificación fuera sobre la aplicación desplegada y no sobre una suposición.
+
+## Prompts
+
+Los prompts de cada fase de construcción están en [PLAN.md](PLAN.md) (secciones "FASE 1" a
+"FASE 7") y los de la conversación, en orden cronológico y con su contexto, en
+[PROMPTS.md](PROMPTS.md).
+
 ## Cómo se dirigió el trabajo
 
 Antes de escribir código se prepararon tres documentos que la IA estaba obligada a respetar:

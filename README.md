@@ -13,6 +13,45 @@ Competencia de Programación con IA, 11 y 12 de septiembre de 2026.
 - **Uso de IA durante el desarrollo:** [docs/USO-DE-IA.md](docs/USO-DE-IA.md)
 - **Sistema de diseño:** [docs/DISENO.md](docs/DISENO.md)
 - **Presentación:** [docs/presentacion/](docs/presentacion/) (11 diapositivas con notas del orador)
+- **Manual de usuario:** [docs/MANUAL-DE-USUARIO.md](docs/MANUAL-DE-USUARIO.md) · [PDF](docs/MANUAL-DE-USUARIO.pdf)
+- **Diagrama de base de datos:** [sección Modelo de datos](#modelo-de-datos) · [PDF](docs/DIAGRAMA-BD.pdf)
+- **Prompts utilizados:** [docs/PROMPTS.md](docs/PROMPTS.md)
+
+## Objetivos
+
+**General:** dar a una entidad de energía un solo lugar donde registrar las granjas solares del país y
+saber, por departamento, cuánto generan, cuánto deberían generar y dónde están fallando.
+
+**Específicos:**
+
+1. Registrar granjas, sus paneles y su generación mensual con validación de datos (RF-01 a RF-07,
+   RF-17).
+2. Calcular sin almacenar la capacidad instalada, la generación acumulada y el CO₂ evitado, para que
+   nunca queden desincronizados (RF-08 a RF-10).
+3. Mostrar el estado del país en un tablero, un mapa interactivo y un reporte por departamento con
+   filtro de fechas (RF-11 a RF-13).
+4. Detectar automáticamente las granjas cuya generación real cae al 80 % de la esperada o menos y
+   dejar rastro del seguimiento (RF-14).
+5. Proyectar la generación de los próximos meses de cada granja y mostrar cuánto ha acertado el
+   modelo (RF-15).
+6. Exponer todo por una API REST versionada y documentada (RF-16).
+
+## Manual de usuario resumido
+
+La versión completa, con una sección por pantalla, está en
+[docs/MANUAL-DE-USUARIO.md](docs/MANUAL-DE-USUARIO.md).
+
+| Quiero… | Dónde |
+|---|---|
+| Ver el estado nacional de un vistazo | Tablero (`/`): gráfica de 12 meses, cinco indicadores, mapa, alertas y tabla por departamento |
+| Ubicar las granjas y filtrarlas | Mapa (`/mapa`): marcadores por capacidad, color por generación, anillo rojo si hay alerta; casillas por departamento |
+| Comparar departamentos en un rango de fechas | Reporte (`/reporte`): elegir Desde y Hasta, Aplicar; las columnas son ordenables |
+| Ver qué granjas están fallando | Alertas (`/alertas`): pestañas Activas, Revisadas, Resueltas, Todas |
+| Ver el detalle y la proyección de una granja | Clic en el nombre desde cualquier tabla o desde el mapa |
+| Dar de alta una granja y sus paneles | `/admin` → Granjas → Crear granja; luego, en su ficha, Crear panel |
+| Registrar la generación de un mes | `/admin` → Generaciones → Crear generación; la esperada se precarga; si la real queda al 80 % o menos, la alerta se crea sola |
+| Dar seguimiento a una alerta | `/admin` → Alertas → Cambiar estado (Activa → Revisada → Resuelta) |
+| Consumir los datos desde otro sistema | `/docs/api` (interactiva) o [docs/API.md](docs/API.md) |
 
 ## Stack
 
@@ -94,12 +133,72 @@ Viven en [config/solar.php](config/solar.php) y no están escritas a mano en nin
 
 ## Modelo de datos
 
+```mermaid
+erDiagram
+    departamentos ||--o{ granjas : "tiene"
+    granjas ||--o{ granja_panel : "instala"
+    modelos_panel ||--o{ granja_panel : "se usa en"
+    granjas ||--o{ generaciones : "registra"
+    granjas ||--o{ alertas : "recibe"
+    generaciones ||--o| alertas : "puede disparar"
+
+    departamentos {
+        bigint id PK
+        string nombre
+        string codigo UK "ISO 3166-2, 3 caracteres"
+        string cabecera
+        decimal latitud
+        decimal longitud
+    }
+    modelos_panel {
+        bigint id PK
+        string marca UK
+        string modelo UK
+        decimal potencia_kw
+        decimal eficiencia
+        string estado "activo | descontinuado"
+    }
+    granjas {
+        bigint id PK
+        bigint departamento_id FK
+        string nombre
+        string municipio
+        string direccion
+        decimal latitud
+        decimal longitud
+        int familias_beneficiadas
+        decimal generacion_esperada_mensual_kwh
+        date fecha_instalacion
+        boolean activa
+        datetime deleted_at "borrado logico"
+    }
+    granja_panel {
+        bigint id PK
+        bigint granja_id FK
+        bigint modelo_panel_id FK
+        int cantidad
+        date fecha_instalacion
+    }
+    generaciones {
+        bigint id PK
+        bigint granja_id FK
+        date periodo UK "dia 1 del mes; unico por granja"
+        decimal generacion_real_kwh
+        decimal generacion_esperada_kwh
+    }
+    alertas {
+        bigint id PK
+        bigint granja_id FK
+        bigint generacion_id FK "unico"
+        date periodo
+        decimal generacion_esperada_kwh
+        decimal generacion_real_kwh
+        decimal porcentaje_desviacion
+        string estado "activa | revisada | resuelta"
+    }
 ```
-departamentos ──< granjas ──< granja_panel >── modelos_panel
-                     │
-                     ├──< generaciones ──< alertas
-                     └──< alertas
-```
+
+Versión imprimible: [docs/DIAGRAMA-BD.pdf](docs/DIAGRAMA-BD.pdf).
 
 - `granjas` usa borrado lógico y una bandera `activa`: una granja se desactiva, nunca se borra.
 - `generaciones` guarda el período como el día 1 del mes y tiene índice único por granja y período.
