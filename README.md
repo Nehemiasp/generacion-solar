@@ -6,7 +6,8 @@ desempeño y proyección de generación futura.
 
 Competencia de Programación con IA, 11 y 12 de septiembre de 2026.
 
-- **URL pública:** _(completar al desplegar)_
+- **URL pública:** [generacion-solar-production-gtqero.laravel.cloud](https://generacion-solar-production-gtqero.laravel.cloud)
+- **Repositorio:** [github.com/Nehemiasp/generacion-solar](https://github.com/Nehemiasp/generacion-solar)
 - **Panel de administración:** `/admin`
 - **Documentación de la API:** `/docs/api` (interactiva) y [docs/API.md](docs/API.md)
 - **Uso de IA durante el desarrollo:** [docs/USO-DE-IA.md](docs/USO-DE-IA.md)
@@ -19,7 +20,7 @@ Competencia de Programación con IA, 11 y 12 de septiembre de 2026.
 |---|---|
 | Backend | Laravel 13, PHP 8.4 |
 | Panel administrativo | Filament 5 |
-| Base de datos | PostgreSQL en producción, SQLite en local |
+| Base de datos | MySQL 8.4 en producción (Laravel Cloud), SQLite en local |
 | Frontend público | Blade y Tailwind CSS 4, fuera de Filament |
 | Mapa | Leaflet con tiles grises de Esri, sin API key |
 | Gráficas | Chart.js |
@@ -30,14 +31,14 @@ solo para el CRUD interno.
 
 ## Requisitos
 
-- PHP 8.3 o superior con las extensiones `pdo_pgsql` o `pdo_sqlite`, `mbstring`, `intl`, `curl`, `zip`, `gd`
+- PHP 8.3 o superior con las extensiones `pdo_mysql`, `pdo_pgsql` o `pdo_sqlite`, `mbstring`, `intl`, `curl`, `zip`, `gd`
 - Composer 2
 - Node.js 20 o superior
 
 ## Instalación local
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/Nehemiasp/generacion-solar.git
 cd generacion-solar
 composer install
 npm install
@@ -60,12 +61,12 @@ en otra terminal.
 
 Se crean con el seeder y se pueden cambiar con `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el `.env`.
 
-### Usar PostgreSQL en local
+### Usar MySQL o PostgreSQL en local
 
 ```env
-DB_CONNECTION=pgsql
+DB_CONNECTION=mysql   # o pgsql
 DB_HOST=127.0.0.1
-DB_PORT=5432
+DB_PORT=3306          # 5432 en PostgreSQL
 DB_DATABASE=generacion_solar
 DB_USERNAME=postgres
 DB_PASSWORD=secreto

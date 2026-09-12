@@ -562,9 +562,9 @@ function pie(s, texto) {
   s.addShape(pres.ShapeType.line, { x: M, y: 3.85, w: 9.0, h: 0, line: { color: C.ink2, width: 1 } });
 
   const enlaces = [
-    ['Aplicación', 'https://'],
-    ['Repositorio', 'github.com/'],
-    ['Documentación de la API', '/docs/api'],
+    ['Aplicación', 'generacion-solar-production-gtqero.laravel.cloud'],
+    ['Repositorio', 'github.com/Nehemiasp/generacion-solar'],
+    ['Documentación de la API', 'generacion-solar-production-gtqero.laravel.cloud/docs/api'],
   ];
   enlaces.forEach(([k, v], i) => {
     const y = 4.05 + i * 0.34;

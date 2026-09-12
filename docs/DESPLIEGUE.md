@@ -1,6 +1,9 @@
 # Despliegue
 
-La aplicación necesita PHP 8.3 o superior, PostgreSQL y un paso de compilación de assets con Node.
+**Producción actual:** [https://generacion-solar-production-gtqero.laravel.cloud](https://generacion-solar-production-gtqero.laravel.cloud) en Laravel Cloud, región US East (Ohio), con Laravel MySQL 8.4
+en configuración Dev y cómputo Flex con escala a cero. Cada `git push` a `main` despliega solo.
+
+La aplicación necesita PHP 8.3 o superior, MySQL o PostgreSQL y un paso de compilación de assets con Node.
 
 ## Variables de entorno
 
@@ -12,9 +15,9 @@ APP_DEBUG=false
 APP_URL=https://tu-dominio
 APP_LOCALE=es
 
-DB_CONNECTION=pgsql
+DB_CONNECTION=mysql   # o pgsql
 DB_HOST=...
-DB_PORT=5432
+DB_PORT=3306
 DB_DATABASE=...
 DB_USERNAME=...
 DB_PASSWORD=...
@@ -67,7 +70,7 @@ php artisan solar:evaluar-alertas
 ## Laravel Cloud
 
 1. Conectar el repositorio de GitHub.
-2. Provisionar PostgreSQL; las variables `DB_*` se inyectan solas.
+2. Agregar un recurso de base de datos (Laravel MySQL 8.4, configuración Dev) vinculado al entorno; las variables `DB_*` se inyectan solas.
 3. Build command: `composer install --no-dev --optimize-autoloader && npm ci && npm run build`
 4. Deploy command: `php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache`
 5. Definir `APP_KEY`, `APP_URL`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el panel de variables.
@@ -85,6 +88,9 @@ php artisan migrate --force && php -S 0.0.0.0:$PORT -t public
 En producción real conviene php-fpm con Nginx en lugar del servidor embebido.
 
 ## Notas
+
+- Con MySQL hay que evitar alias SQL que sean palabras reservadas (`real`, `order`, `key`). SQLite los tolera
+  y el error solo aparece en producción; ya se corrigió uno en `EstadisticasService`.
 
 - `AppServiceProvider` fuerza esquema HTTPS en producción, porque la aplicación corre detrás de un
   proxy TLS y de lo contrario los assets salen por `http` y el navegador los bloquea.

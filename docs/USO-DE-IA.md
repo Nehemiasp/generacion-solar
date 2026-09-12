@@ -57,6 +57,9 @@ Se listan porque demuestran que el código generado se revisó en lugar de acept
    desactivó la carga diferida de los widgets y del relation manager.
 6. **Formato numérico.** Con el locale en español, Filament mostraba `414.432` en lugar de `414,432`.
    Se forzó el locale numérico a inglés solo para las cifras, conservando las fechas en español.
+7. **Palabra reservada en MySQL.** La serie nacional usaba `real` como alias de columna. SQLite lo
+   acepta; MySQL en producción respondía 500. Se detectó al abrir la URL desplegada y se corrigió
+   renombrando los alias.
 
 ## Qué decidió el equipo y no la IA
 
