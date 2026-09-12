@@ -1,9 +1,386 @@
 @import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
 
+/* Tokens del sistema (docs/DISENO.md). Nada fuera de aquí. */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Archivo', system-ui, sans-serif;
+
+    --color-gen-1: #EFE7CC;
+    --color-gen-2: #E0CD8A;
+    --color-gen-3: #CFAC45;
+    --color-gen-4: #A9831A;
+    --color-gen-5: #75590A;
+
+    --color-ground: #F5F6F4;
+    --color-surface: #FFFFFF;
+    --color-rule: #DCE0DE;
+    --color-rule-strong: #B6BDBA;
+    --color-ink: #1B2426;
+    --color-ink-2: #5A6568;
+    --color-ink-3: #8D9698;
+    --color-hover: #EEF0EE;
+    --color-grid: #ECEFED;
+
+    --color-alerta: #B32747;
+    --color-alerta-grave: #7E1230;
+    --color-interactivo: #0F5C63;
+
+    --radius-control: 3px;
+    --shadow-popup: 0 2px 8px rgba(27, 36, 38, 0.16);
+
+    --text-etiqueta: 12px;
+    --text-etiqueta--line-height: 1.3;
+    --text-etiqueta--font-weight: 500;
+    --text-tabla: 13px;
+    --text-tabla--line-height: 1.4;
+    --text-cuerpo: 15px;
+    --text-cuerpo--line-height: 1.5;
+    --text-titulo: 21px;
+    --text-titulo--line-height: 1.3;
+    --text-titulo--font-weight: 600;
+    --text-cifra: 26px;
+    --text-cifra--line-height: 1.1;
+    --text-cifra--font-weight: 600;
+    --text-cifra-xl: 48px;
+    --text-cifra-xl--line-height: 1;
+    --text-cifra-xl--font-weight: 600;
+}
+
+@layer base {
+    html {
+        color-scheme: light;
+    }
+    body {
+        background: var(--color-ground);
+        color: var(--color-ink);
+        font-size: var(--text-cuerpo);
+        line-height: var(--text-cuerpo--line-height);
+        -webkit-font-smoothing: antialiased;
+    }
+    a {
+        color: var(--color-interactivo);
+    }
+    :focus-visible {
+        outline: 2px solid var(--color-interactivo);
+        outline-offset: 2px;
+    }
+}
+
+@layer components {
+    /* Cifras: siempre tabulares y a la derecha. Las grandes, semicondensadas. */
+    .cifra {
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        color: var(--color-ink);
+    }
+    .cifra-xl {
+        font-size: var(--text-cifra-xl);
+        line-height: 1;
+        font-weight: 600;
+        font-stretch: 78%;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+    }
+    .cifra-md {
+        font-size: var(--text-cifra);
+        line-height: 1.1;
+        font-weight: 600;
+        font-stretch: 85%;
+        font-variant-numeric: tabular-nums;
+    }
+    .unidad {
+        font-size: 12px;
+        color: var(--color-ink-3);
+        margin-left: 3px;
+        font-weight: 400;
+        font-stretch: 100%;
+    }
+    .etiqueta {
+        font-size: var(--text-etiqueta);
+        line-height: 1.3;
+        font-weight: 500;
+        color: var(--color-ink-2);
+    }
+    .titulo {
+        font-size: var(--text-titulo);
+        line-height: 1.3;
+        font-weight: 600;
+    }
+
+    /* Tablas densas: 34px por fila, encabezado 30px */
+    .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--text-tabla);
+        line-height: 1.4;
+        background: var(--color-surface);
+    }
+    .tabla th {
+        height: 30px;
+        padding: 0 12px;
+        text-align: left;
+        font-weight: 500;
+        color: var(--color-ink-2);
+        border-bottom: 1px solid var(--color-rule-strong);
+        white-space: nowrap;
+    }
+    .tabla td {
+        height: 34px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--color-rule);
+        white-space: nowrap;
+    }
+    .tabla th.num,
+    .tabla td.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+    .tabla td.num {
+        font-weight: 500;
+    }
+    .tabla tbody tr:hover td {
+        background: var(--color-hover);
+    }
+    .tabla tfoot td {
+        border-top: 1px solid var(--color-rule-strong);
+        border-bottom: 0;
+        font-weight: 500;
+    }
+    .tabla th a {
+        color: inherit;
+        text-decoration: none;
+    }
+    .tabla th a[aria-sort]::after {
+        content: ' ↓';
+        color: var(--color-ink-3);
+    }
+    .tabla th a[aria-sort='ascending']::after {
+        content: ' ↑';
+    }
+    /* Columna fija en móvil */
+    .tabla-scroll {
+        overflow-x: auto;
+    }
+    .tabla-scroll .tabla th:first-child,
+    .tabla-scroll .tabla td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--color-surface);
+        z-index: 1;
+    }
+    .tabla-scroll .tabla tbody tr:hover td:first-child {
+        background: var(--color-hover);
+    }
+
+    /* Controles: radio 3px, sin sombras */
+    .btn,
+    .campo {
+        height: 32px;
+        padding: 0 12px;
+        font-size: 13px;
+        font-family: inherit;
+        color: var(--color-ink);
+        background: var(--color-surface);
+        border: 1px solid var(--color-rule-strong);
+        border-radius: var(--radius-control);
+    }
+    .btn {
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .btn:hover {
+        background: var(--color-hover);
+    }
+    .btn-primario {
+        background: var(--color-interactivo);
+        border-color: var(--color-interactivo);
+        color: #fff;
+    }
+    .btn-primario:hover {
+        background: #0c4a50;
+    }
+    .chip {
+        display: inline-block;
+        height: 28px;
+        line-height: 26px;
+        padding: 0 10px;
+        font-size: 13px;
+        color: var(--color-ink-2);
+        border: 1px solid var(--color-rule-strong);
+        border-radius: var(--radius-control);
+        background: var(--color-surface);
+        text-decoration: none;
+    }
+    .chip[aria-current='true'] {
+        color: var(--color-interactivo);
+        border-color: var(--color-interactivo);
+        font-weight: 500;
+    }
+
+    /* Escala de generación como swatch */
+    .sw {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        vertical-align: -1px;
+        margin-right: 6px;
+    }
+    .q1 { background: var(--color-gen-1); }
+    .q2 { background: var(--color-gen-2); }
+    .q3 { background: var(--color-gen-3); }
+    .q4 { background: var(--color-gen-4); }
+    .q5 { background: var(--color-gen-5); }
+
+    /* Alerta: texto + porcentaje, nunca solo color */
+    .desv {
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+    }
+    .desv-alerta { color: var(--color-alerta); }
+    .desv-grave { color: var(--color-alerta-grave); }
+
+    .panel {
+        background: var(--color-surface);
+        border: 1px solid var(--color-rule);
+    }
+    .vacio {
+        padding: 24px 16px;
+        color: var(--color-ink-2);
+        font-size: 15px;
+    }
+    .skeleton {
+        background: var(--color-grid);
+    }
+}
+
+/* ---- Leaflet: sin look de plantilla ---- */
+.leaflet-container {
+    background: var(--color-ground);
+    font-family: inherit;
+    font-size: 13px;
+}
+.leaflet-bar {
+    border: 1px solid var(--color-rule-strong);
+    border-radius: 0;
+    box-shadow: none;
+}
+.leaflet-bar a {
+    width: 28px;
+    height: 28px;
+    line-height: 26px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border-bottom: 1px solid var(--color-rule);
+    border-radius: 0 !important;
+    font-weight: 400;
+}
+.leaflet-bar a:hover {
+    background: var(--color-hover);
+}
+.leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--color-ink-3);
+    font-size: 10px;
+}
+.leaflet-popup-content-wrapper {
+    border-radius: 0;
+    box-shadow: var(--shadow-popup);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    padding: 0;
+}
+.leaflet-popup-content {
+    margin: 0;
+    padding: 12px 16px 16px;
+    min-width: 260px;
+    line-height: 1.4;
+}
+.leaflet-popup-tip-container {
+    display: none;
+}
+.leaflet-popup-close-button {
+    color: var(--color-ink-3) !important;
+    font-size: 18px !important;
+    padding: 6px 8px 0 0 !important;
+}
+.popup-nombre {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-right: 16px;
+}
+.popup-lugar {
+    color: var(--color-ink-2);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+.popup-metricas {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 16px;
+    font-size: 13px;
+}
+.popup-metricas dt {
+    color: var(--color-ink-2);
+}
+.popup-metricas dd {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+.popup-alerta {
+    margin-top: 8px;
+    color: var(--color-alerta);
+    font-size: 13px;
+    font-weight: 500;
+}
+.popup-enlace {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 13px;
+}
+.leyenda {
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule-strong);
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+}
+.leyenda-fila {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.leyenda-anillo {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--color-alerta);
+    box-sizing: border-box;
+}
+.leyenda-titulo {
+    color: var(--color-ink);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.mapa-vacio {
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 246, 244, 0.85);
+    padding: 24px;
+    text-align: left;
+}
+
+/* Cambio de filtro: 120ms de opacidad. Único movimiento reactivo. */
+.leaflet-interactive {
+    transition: opacity 120ms linear;
 }
