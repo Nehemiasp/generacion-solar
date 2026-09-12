@@ -39,7 +39,8 @@
                 <h2 class="titulo">Granjas activas</h2>
                 <a href="{{ route('mapa') }}" class="text-[13px]">Mapa completo con filtros</a>
             </div>
-            <div data-mapa data-rueda="no" class="relative h-[60vh] lg:h-[460px]" role="region" aria-label="Mapa de granjas solares"></div>
+            {{-- Sin leyenda: la escala se explica una sola vez, en el mapa completo --}}
+            <div data-mapa data-rueda="no" data-leyenda="no" class="relative h-[60vh] lg:h-[460px]" role="region" aria-label="Mapa de granjas solares"></div>
         </div>
 
         <div class="panel">

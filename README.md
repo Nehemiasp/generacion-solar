@@ -11,6 +11,7 @@ Competencia de Programación con IA, 11 y 12 de septiembre de 2026.
 - **Documentación de la API:** `/docs/api` (interactiva) y [docs/API.md](docs/API.md)
 - **Uso de IA durante el desarrollo:** [docs/USO-DE-IA.md](docs/USO-DE-IA.md)
 - **Sistema de diseño:** [docs/DISENO.md](docs/DISENO.md)
+- **Presentación:** [docs/presentacion/](docs/presentacion/) (11 diapositivas con notas del orador)
 
 ## Stack
 
