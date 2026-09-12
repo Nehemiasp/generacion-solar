@@ -1,47 +1,32 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Proyecto: Sistema de Generación Solar Guatemala
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Competencia de 1 día. Laravel 13 + Filament 5 + PostgreSQL (SQLite en local) + Leaflet + Chart.js.
+Diseño vinculante: `docs/DISENO.md`. Plan: `docs/PLAN.md`.
 
-## Prerequisites
+## Entorno local (Windows)
+- PHP 8.4 en `C:\php` (con intl, pdo_pgsql, pdo_sqlite). Composer: `C:\php\composer.phar`.
+- En Git Bash: `export PATH="/c/php:$PATH"` antes de `php`/`composer`.
 
-Verify that PHP and Composer are available:
+## Reglas no negociables
+- Idioma del dominio: ESPAÑOL. Tablas, modelos, campos y rutas en español
+  (granjas, modelos_panel, generaciones, alertas). Código y comentarios en español.
+- Nunca inventes API de Filament de memoria. Si no estás seguro de una firma,
+  revisá un archivo generado por `make:` o el código en `vendor/filament`.
+- Valores derivados = accessors o scopes. Nunca columnas duplicadas en BD.
+- Constantes de negocio siempre desde config('solar.*'). Cero números mágicos.
+- Ningún secreto en el código. Todo va a .env y .env.example.
+- Después de cada cambio de migración: `php artisan migrate:fresh --seed` y confirmar que corre.
+- No refactorices archivos que no te pedí tocar.
+- Commits pequeños, mensaje en español: `feat: ...` / `fix: ...`
 
-```sh
-php -v
-composer -V
-```
+## Antes de terminar una tarea
+1. Ejecutá el código, no asumas que sirve.
+2. Reportá qué probaste y qué salida obtuviste.
+3. Si algo quedó a medias, decilo explícitamente.
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## Contexto de negocio
+- 22 departamentos de Guatemala.
+- CO2 evitado = kWh × 0.40 kg.
+- Alerta cuando generación real <= 80% de la esperada en el mismo período.
+- Períodos son mensuales, almacenados como fecha del día 1 del mes.
+- Proyección: regresión lineal (mínimos cuadrados) sobre últimos 12 períodos; promedio móvil si hay < 3.
