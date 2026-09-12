@@ -139,14 +139,15 @@ class EstadisticasService
             ->join('granjas', 'granjas.id', '=', 'generaciones.granja_id')
             ->where('granjas.activa', true)->whereNull('granjas.deleted_at')
             ->where('periodo', '>=', $inicio->toDateString())
-            ->selectRaw('periodo, SUM(generacion_real_kwh) as real, SUM(generacion_esperada_kwh) as esperada')
+            // 'real' es palabra reservada en MySQL: los alias llevan sufijo
+            ->selectRaw('periodo, SUM(generacion_real_kwh) as real_kwh, SUM(generacion_esperada_kwh) as esperada_kwh')
             ->groupBy('periodo')->orderBy('periodo')
             ->get()->keyBy(fn ($f) => CarbonImmutable::parse($f->periodo)->format('Y-m'));
 
         return array_map(fn ($p) => [
             'periodo' => $p.'-01',
-            'real_kwh' => (float) ($filas[$p]->real ?? 0),
-            'esperada_kwh' => (float) ($filas[$p]->esperada ?? 0),
+            'real_kwh' => (float) ($filas[$p]->real_kwh ?? 0),
+            'esperada_kwh' => (float) ($filas[$p]->esperada_kwh ?? 0),
         ], $this->periodos($inicio, $meses));
     }
 
