@@ -60,6 +60,13 @@ Se listan porque demuestran que el código generado se revisó en lugar de acept
 7. **Palabra reservada en MySQL.** La serie nacional usaba `real` como alias de columna. SQLite lo
    acepta; MySQL en producción respondía 500. Se detectó al abrir la URL desplegada y se corrigió
    renombrando los alias.
+8. **Acceso al panel en producción.** El login de Filament funcionaba en local pero en producción
+   devolvía 403 tras autenticarse. Filament solo deja pasar a cualquier usuario en entorno `local`;
+   fuera de él exige que el modelo `User` implemente `FilamentUser::canAccessPanel()`. La IA no lo
+   había previsto; se detectó al probar el panel desplegado.
+9. **Cifras desbordadas en móvil.** En 375 px, `260,191` y `308.13 GWh` se salían de su celda en el
+   tablero. Se detectó midiendo `scrollWidth` contra `clientWidth` en producción y se corrigió con
+   `clamp()` en el tamaño de fuente.
 
 ## Qué decidió el equipo y no la IA
 
