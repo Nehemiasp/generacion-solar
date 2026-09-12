@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-ground text-ink font-sans">
-    <header class="border-b border-rule-strong bg-surface">
+    <header class="sticky top-0 z-[1100] border-b border-rule-strong bg-surface">
         <div class="mx-auto flex max-w-7xl flex-wrap items-center px-4 sm:h-14 sm:flex-nowrap sm:gap-6 sm:px-6">
             <a href="{{ route('inicio') }}" class="h-14 shrink-0 whitespace-nowrap text-[15px] font-semibold leading-[56px] text-ink no-underline">Generación solar · Guatemala</a>
 
