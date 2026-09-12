@@ -31,7 +31,7 @@
             $anterior = url()->previous();
             $volverA = $anterior !== url()->current() ? $anterior : route('inicio');
         @endphp
-        @unless (request()->routeIs('inicio') && $anterior === url()->current())
+        @unless (request()->routeIs('inicio'))
             <a href="{{ $volverA }}" data-volver class="btn mb-4 inline-flex items-center gap-2 no-underline">
                 <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2 3.5 6l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
                 Volver
