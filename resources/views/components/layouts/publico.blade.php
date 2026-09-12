@@ -22,7 +22,7 @@
             </button>
 
             <nav id="nav-principal" data-nav aria-label="Principal"
-                 class="hidden w-full flex-col gap-1 border-t border-rule py-2 text-[14px] sm:ml-auto sm:flex sm:w-auto sm:flex-row sm:items-center sm:border-0 sm:py-0 sm:text-[13px]">
+                 class="absolute left-0 right-0 top-full z-[999] hidden w-full flex-col gap-1 border-b border-rule-strong bg-surface px-4 py-2 text-[14px] sm:static sm:z-auto sm:ml-auto sm:flex sm:w-auto sm:flex-row sm:items-center sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-[13px]">
                 @foreach ([['inicio', 'Tablero'], ['mapa', 'Mapa'], ['reporte', 'Reporte'], ['alertas', 'Alertas']] as [$ruta, $nombre])
                     <a href="{{ route($ruta) }}"
                        class="shrink-0 px-3 py-2 no-underline rounded-control sm:py-1.5 {{ request()->routeIs($ruta) ? 'bg-ground text-ink font-medium' : 'text-ink-2 hover:text-ink' }}"
