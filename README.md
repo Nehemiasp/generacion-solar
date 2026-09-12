@@ -53,6 +53,27 @@ La versión completa, con una sección por pantalla, está en
 | Dar seguimiento a una alerta | `/admin` → Alertas → Cambiar estado (Activa → Revisada → Resuelta) |
 | Consumir los datos desde otro sistema | `/docs/api` (interactiva) o [docs/API.md](docs/API.md) |
 
+## Equipo
+
+Participación individual.
+
+| Integrante | Carné | Rol |
+|---|---|---|
+| Nehemías Pérez Palma | 0909-26-9887 | Desarrollador único: dirección del proyecto, diseño y revisión |
+
+**Tareas realizadas:**
+
+| Área | Tareas |
+|---|---|
+| Análisis | Lectura del reto, definición de los 17 requerimientos, decisión de que los valores derivados se calculan y no se guardan |
+| Preparación de la IA | Redacción de `CLAUDE.md`, `docs/PLAN.md` (esquema y fases) y `docs/DISENO.md` (sistema de diseño) |
+| Desarrollo dirigido por IA | Un prompt por fase, revisión de cada resultado, verificación en navegador y corrección de los nueve fallos listados en `docs/USO-DE-IA.md` |
+| Diseño UI/UX | Paleta, tipografía, densidad, comportamiento responsive, ajustes de navegación (Volver, menú móvil, encabezado fijo) |
+| Datos | Parámetros de los datos de demostración (35 granjas, 18 meses, granjas en bajo desempeño) |
+| Despliegue | Repositorio en GitHub, Laravel Cloud con MySQL, variables de entorno, seed en producción, diagnóstico de los errores 500 y 403 |
+| Verificación | Pruebas automatizadas, recorrido de producción en escritorio y móvil, público y panel |
+| Documentación y presentación | README, manual de usuario, diagrama de base de datos, API, uso de IA, prompts, presentación de 11 diapositivas |
+
 ## Stack
 
 | Pieza | Elección |

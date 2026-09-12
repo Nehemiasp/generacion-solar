@@ -33,7 +33,12 @@ Los prompts de cada fase de construcción están en [PLAN.md](PLAN.md) (seccione
 
 ## Cómo se dirigió el trabajo
 
-Antes de escribir código se prepararon tres documentos que la IA estaba obligada a respetar:
+El proyecto lo desarrolló una sola persona (Nehemías Pérez Palma, carné 0909-26-9887), que actuó como
+director del trabajo de la IA: definió qué construir, revisó cada resultado y tomó las decisiones
+listadas más abajo.
+
+Antes de escribir código se pidieron a la IA, a partir del PDF del reto, tres documentos que luego el
+equipo revisó y que la IA estaba obligada a respetar en todo el desarrollo:
 
 | Documento | Qué fija |
 |---|---|

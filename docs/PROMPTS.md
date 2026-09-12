@@ -1,132 +1,158 @@
 # Prompts utilizados
 
-Registro de las instrucciones que se dieron a Claude Code durante el desarrollo, en orden
-cronológico. Se transcriben como se escribieron; entre corchetes va el contexto que hacía falta para
-entenderlas (capturas de pantalla adjuntas, resultado obtenido).
+Registro de las instrucciones dadas a Claude Code durante el desarrollo, en orden cronológico. Entre
+corchetes va el contexto necesario para entender cada una (archivos o capturas adjuntas, resultado
+obtenido).
 
-Los prompts largos de cada fase de construcción se redactaron antes de empezar y están en
-[PLAN.md](PLAN.md), secciones "FASE 1" a "FASE 7". Aquí se listan los que se escribieron en la
-conversación.
+Los prompts de las siete fases de construcción se redactaron en la etapa de preparación y están en
+[PLAN.md](PLAN.md), secciones "FASE 1" a "FASE 7". Aquí se listan los de la conversación.
 
-## 1. Arranque
+## 0. Preparación
 
-> Tengo ya los md para que te guíes en la carpeta y aparte te pasaré el pdf donde se encuentran todas
-> las indicaciones para realizar el proyecto, me ayudas a crear este proyecto y puedes usar skills para
-> que se te haga más fácil pero skills buenos que el UI/UX no se mire genérico o hecho con IA.
+> Adjunto las bases del reto. Antes de escribir código necesito dos documentos de trabajo. Primero, un
+> plan de desarrollo: esquema de base de datos cerrado, con tablas, columnas y restricciones; fases de
+> trabajo con tiempo estimado; el prompt que le daré a la IA en cada fase; y criterios de aceptación
+> por fase. Las tablas y campos van en español. Los valores derivados (capacidad instalada, generación
+> acumulada, CO₂ evitado) no se guardan como columnas: se calculan.
 >
-> [Adjunto: PDF del reto. En la carpeta: `PLAN.md` con el esquema de datos y las fases, `DISENO.md`
-> con el sistema de diseño vinculante.]
+> [Adjunto: PDF del reto. Resultado: `docs/PLAN.md`, revisado y ajustado por el equipo.]
 
-> Continúa.
-
-> Haz un backup primero y después continúa.
+> Segundo, un sistema de diseño vinculante para el frontend público y el panel: paleta con una sola
+> escala de color para representar generación, tipografía, densidad de información, formato de cifras
+> con separador de miles, tratamiento del mapa y de las gráficas, y una lista explícita de lo que está
+> prohibido (sombras, degradados, esquinas redondeadas en superficies de datos, colores por defecto de
+> las librerías). El objetivo es que la aplicación no se vea genérica ni "hecha con IA".
 >
-> [Resultado: commit por fase y copia comprimida en `backups/` antes de seguir.]
+> [Resultado: `docs/DISENO.md`. Se agregó después la sección 15 con las desviaciones justificadas.]
 
-> Intentar nuevamente.
+> Reglas permanentes del proyecto para el archivo `CLAUDE.md`: dominio en español, nada de columnas
+> derivadas, constantes de negocio solo desde `config/solar.php`, ningún secreto en el código, ejecutar
+> el código antes de darlo por terminado y reportar qué se probó.
+>
+> [Resultado: `CLAUDE.md`, que el agente lee al inicio de cada sesión.]
+
+## 1. Construcción
+
+> Adjunto el PDF con las indicaciones completas del reto. En la carpeta están `PLAN.md` y `DISENO.md`,
+> que debes seguir. Construye el proyecto fase por fase según el plan. Puedes apoyarte en skills para
+> el frontend, pero la interfaz debe respetar el sistema de diseño: nada genérico.
+>
+> [Adjunto: PDF del reto.]
+
+> Continúa con la siguiente fase.
+
+> Antes de continuar, haz un respaldo del estado actual.
+>
+> [Resultado: commit por fase y copia comprimida en `backups/`.]
+
+> Inténtalo de nuevo.
 >
 > [Tras un fallo de la terminal al escribir varios archivos en un solo comando.]
 
 ## 2. Mapa
 
-> Tengo CARTO pero no sé cómo generar la API.
+> Tengo una cuenta de CARTO pero no encuentro cómo generar la clave de API. ¿Es necesaria?
 >
-> [Adjunto: captura del panel de CARTO. Los mosaicos de CARTO devolvían "API KEY REQUIRED".]
+> [Adjunto: captura del panel de CARTO. Los mosaicos devolvían "API KEY REQUIRED".]
 
-> No, no cambies nada, así déjalo mejor como estaba sin CARTO, empecemos con las mejoras del UI que
-> te daré a continuación, primero que nada necesito que todo tenga un botón de regresar para regresar
-> a la pantalla anterior porque estoy viendo que no se puede solo con el click anterior.
+> Descarta CARTO y deja el mapa como estaba, con los mosaicos de Esri. Pasemos a los ajustes de
+> interfaz. El primero: todas las pantallas, públicas y del panel, necesitan un botón para volver a la
+> pantalla anterior; el botón "atrás" del navegador no basta para el flujo de uso.
 >
-> [Decisión del equipo: mantener los mosaicos de Esri, que no requieren clave.]
+> [Decisión del equipo: mantener Esri, que no requiere clave.]
 
 ## 3. Ajustes de interfaz
 
-> Me pasas las credenciales del login.
+> Indícame las credenciales de acceso al panel.
 
-> En la administración aumenta el gap entre el header y el botón de volver.
+> En el panel de administración, aumenta la separación entre el encabezado y el botón Volver.
 >
 > [Adjunto: captura del panel.]
 
-> Al home quítale el botón de volver.
+> El tablero es la pantalla de inicio: quítale el botón Volver.
 
-> Puedes hacer de todas las cards que tengan bordes redondeados.
+> Aplica esquinas redondeadas a todas las tarjetas.
 >
-> [Interrumpido y descartado: el sistema de diseño fija radio 0 en superficies de datos.]
+> [Interrumpido y descartado por el equipo: el sistema de diseño fija radio 0 en superficies de datos.]
 
-> En responsive haz un menú de hamburguesa.
+> En pantallas angostas, convierte la navegación en un menú de hamburguesa.
 >
 > [Adjunto: captura del encabezado a 375 px.]
 
-> Haz que el header sea sticky y no lo de los bordes, ignóralo.
+> Haz el encabezado fijo al hacer scroll. Lo de las esquinas redondeadas queda descartado.
 
-> Sí, pero cuando se abre el menú de hamburguesa se baja el contenido y tiene que quedar un z-index
-> 999.
+> El menú de hamburguesa funciona, pero al abrirse empuja el contenido hacia abajo. Debe superponerse
+> al contenido con z-index 999.
 
-> Pregunta: ¿cómo paso las alertas a revisadas o resueltas?
+> ¿Cómo cambio una alerta a Revisada o Resuelta desde el panel?
 
 ## 4. Despliegue
 
-> ¿Me ayudas a deployarlo? ¿Dónde lo puedo hacer y conseguir un dominio gratis?
+> Necesito publicar la aplicación. ¿Qué opciones hay para desplegarla con un dominio gratuito?
 
-> Primero tengo que subirlo a GitHub o la creo desde un template.
+> ¿Debo subir el código a GitHub primero o crear el proyecto desde una plantilla del proveedor?
 >
 > [Adjunto: captura de Laravel Cloud.]
 
-> Aquí está, súbelo tú: https://github.com/Nehemiasp/generacion-solar
+> Ya creé el repositorio: https://github.com/Nehemiasp/generacion-solar. Sube el código.
 
-> ¿Le doy a deploy va?
+> ¿Procedo con el despliegue?
 
-> Esto me sale. / No me deja seleccionar otro type, o sea le doy a add resource-database y me sale
-> eso que te compartí. / Aaa bien, sí me sale, ¿cuál dijiste?
+> Al agregar el recurso de base de datos aparece este diálogo y no me deja elegir otro tipo. ¿Cuál
+> recomendaste?
 >
-> [Adjuntos: capturas del diálogo de base de datos. Se eligió Laravel MySQL 8.4 en configuración Dev.]
+> [Adjuntos: capturas del diálogo. Se eligió Laravel MySQL 8.4 en configuración Dev por costo.]
 
-> Aquí están.
+> Variables de entorno cargadas.
 >
-> [Adjunto: captura de las variables de entorno cargadas.]
+> [Adjunto: captura de las variables.]
 
-> Eeeeh: https://generacion-solar-production-gtqero.laravel.cloud/
+> La URL de producción responde con error 500: https://generacion-solar-production-gtqero.laravel.cloud/
 >
-> [La URL devolvía 500. Causa: alias SQL `real`, palabra reservada en MySQL.]
+> [Causa: alias SQL `real`, palabra reservada en MySQL. Corregido.]
 
-> Ya corrí el seed, revisa que todo cargue bien.
+> Ya ejecuté el seed en producción. Verifica que todo cargue correctamente.
 
-> El admin no, puse admin@solar.gt.
+> El panel de administración responde 403 después de iniciar sesión con la cuenta de administrador.
 >
 > [Adjunto: captura del 403. Causa: Filament exige `FilamentUser::canAccessPanel()` fuera de local.]
 
 ## 5. Verificación en producción
 
-> Ya entré al admin, revisa que todo cargue bien.
+> Ya tengo sesión iniciada en el panel. Revisa que todas sus pantallas carguen bien en producción.
 
 > Revisa también las páginas públicas en producción.
 
-> Revisa también en responsive las páginas públicas.
+> Revisa las páginas públicas en modo responsive.
 >
 > [Se detectó y corrigió el desborde de cifras a 375 px.]
 
-> Revisa también el admin en responsive.
+> Revisa el panel de administración en modo responsive.
 
 ## 6. Documentación y entrega
 
-> Actualiza el doc de uso de IA con el fallo 8.
+> Actualiza el documento de uso de IA con el fallo del acceso al panel en producción.
 
-> Quita el js de generar-presentación.js del GitHub.
+> Retira el script generador de la presentación del repositorio; el archivo `.pptx` sí se queda.
 
-> En la presentación quita lo de "1 día", eso es un problema mío no del pdf que nos mandaron, cambia
-> por algún problema que sea del pdf que lo muestre ahí.
+> En la diapositiva 2, el bloque "1 día" describe una circunstancia nuestra, no del reto. Sustitúyelo
+> por un dato que sí provenga del planteamiento del PDF.
 
-> Estas son las rúbricas y bases que nos dieron, cumple con todo, si no es así dime primero, no
-> ejecutes nada.
+> Adjunto la rúbrica de evaluación y las bases de la competencia. Compara el proyecto contra ambas y
+> dime qué falta antes de hacer cualquier cambio.
 >
 > [Adjuntos: `Rubrica de Evaluacion.pdf` y `Bases para Competencia Dia del Programador.pdf`. La IA
 > listó siete faltantes y esperó confirmación.]
 
-> Sí, haz los puntos 1 al 4; el 3 haz un pdf de eso también y el 4 también haz un pdf de eso.
+> Procede con los puntos 1 al 4. Del manual de usuario y del diagrama de base de datos genera también
+> una versión en PDF.
+
+> Genera la versión en PDF de toda la documentación relevante en Markdown y entrégamela.
 
 ## Patrón de trabajo
 
 Las instrucciones son cortas porque el contexto pesado ya estaba en archivos: `CLAUDE.md` (reglas
 permanentes), `PLAN.md` (esquema y fases) y `DISENO.md` (sistema de diseño). Cada prompt de la
-conversación pide una cosa; cuando la IA propuso algo que el equipo no quería (CARTO, bordes
-redondeados) se descartó en el siguiente mensaje.
+conversación pide una sola cosa. Cuando la IA propuso algo que el equipo no quería (CARTO, esquinas
+redondeadas) se descartó en el mensaje siguiente, y antes de los cambios de entrega se le pidió
+primero un diagnóstico sin ejecutar nada.
