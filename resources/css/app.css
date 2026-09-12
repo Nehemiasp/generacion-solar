@@ -76,7 +76,8 @@
         color: var(--color-ink);
     }
     .cifra-xl {
-        font-size: var(--text-cifra-xl);
+        /* En móvil las celdas de indicadores miden ~140px; 48px no cabe con seis dígitos. */
+        font-size: clamp(34px, 10vw, var(--text-cifra-xl));
         line-height: 1;
         font-weight: 600;
         font-stretch: 78%;
