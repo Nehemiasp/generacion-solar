@@ -7,6 +7,23 @@ use App\Http\Controllers\Api\V1\GeneracionController;
 use App\Http\Controllers\Api\V1\GranjaController;
 use Illuminate\Support\Facades\Route;
 
+// Índice de la API: /api y /api/v1 no son recursos, pero responden con la lista de endpoints
+// en lugar de un 404, para quien entre por la URL base que muestra la documentación.
+$indice = fn () => response()->json([
+    'nombre' => 'Generación solar · Guatemala',
+    'version' => 'v1',
+    'documentacion' => url('/docs/api'),
+    'endpoints' => collect([
+        'departamentos', 'departamentos/{id}',
+        'granjas', 'granjas/{id}', 'granjas/mapa', 'granjas/{id}/generaciones', 'granjas/{id}/proyeccion?meses=3',
+        'generaciones',
+        'estadisticas/nacional', 'estadisticas/departamentos',
+        'alertas',
+    ])->map(fn (string $ruta) => url("/api/v1/{$ruta}"))->values(),
+]);
+Route::get('/', $indice);
+Route::get('v1', $indice);
+
 // API pública de solo lectura, versionada (RF-16). Rate limit: 60 req/min por IP.
 Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('departamentos', [DepartamentoController::class, 'index']);
