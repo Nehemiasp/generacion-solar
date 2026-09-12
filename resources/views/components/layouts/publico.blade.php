@@ -10,17 +10,17 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-ground text-ink font-sans">
-    <header class="h-14 border-b border-rule-strong bg-surface">
-        <div class="mx-auto flex h-full max-w-7xl items-center gap-6 px-4 sm:px-6">
-            <a href="{{ route('inicio') }}" class="text-[15px] font-semibold text-ink no-underline">Generación solar · Guatemala</a>
-            <nav class="ml-auto flex items-center gap-1 overflow-x-auto text-[13px]" aria-label="Principal">
+    <header class="border-b border-rule-strong bg-surface">
+        <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2 sm:h-14 sm:flex-row sm:items-center sm:gap-6 sm:py-0 sm:px-6">
+            <a href="{{ route('inicio') }}" class="shrink-0 whitespace-nowrap text-[15px] font-semibold text-ink no-underline">Generación solar · Guatemala</a>
+            <nav class="-mx-1 flex items-center gap-1 overflow-x-auto text-[13px] sm:ml-auto sm:mx-0" aria-label="Principal">
                 @foreach ([['inicio', 'Tablero'], ['mapa', 'Mapa'], ['reporte', 'Reporte'], ['alertas', 'Alertas']] as [$ruta, $nombre])
                     <a href="{{ route($ruta) }}"
-                       class="px-3 py-1.5 no-underline rounded-control {{ request()->routeIs($ruta) ? 'bg-ground text-ink font-medium' : 'text-ink-2 hover:text-ink' }}"
+                       class="shrink-0 px-3 py-1.5 no-underline rounded-control {{ request()->routeIs($ruta) ? 'bg-ground text-ink font-medium' : 'text-ink-2 hover:text-ink' }}"
                        @if(request()->routeIs($ruta)) aria-current="page" @endif>{{ $nombre }}</a>
                 @endforeach
-                <a href="/docs/api" class="px-3 py-1.5 text-ink-2 no-underline hover:text-ink">API</a>
-                <a href="/admin" class="ml-2 px-3 py-1.5 text-interactivo no-underline border border-rule-strong rounded-control hover:bg-ground">Administración</a>
+                <a href="/docs/api" class="shrink-0 px-3 py-1.5 text-ink-2 no-underline hover:text-ink">API</a>
+                <a href="/admin" class="ml-1 shrink-0 px-3 py-1.5 text-interactivo no-underline border border-rule-strong rounded-control hover:bg-ground sm:ml-2">Administración</a>
             </nav>
         </div>
     </header>

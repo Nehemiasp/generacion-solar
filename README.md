@@ -1,58 +1,162 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema de Registro y Monitoreo de Generación Solar por Departamento
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web para registrar granjas solares de Guatemala, su generación mensual real y esperada, y
+analizar el resultado por departamento: indicadores nacionales, mapa interactivo, alertas de bajo
+desempeño y proyección de generación futura.
 
-## About Laravel
+Competencia de Programación con IA, 11 y 12 de septiembre de 2026.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **URL pública:** _(completar al desplegar)_
+- **Panel de administración:** `/admin`
+- **Documentación de la API:** `/docs/api` (interactiva) y [docs/API.md](docs/API.md)
+- **Uso de IA durante el desarrollo:** [docs/USO-DE-IA.md](docs/USO-DE-IA.md)
+- **Sistema de diseño:** [docs/DISENO.md](docs/DISENO.md)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Pieza | Elección |
+|---|---|
+| Backend | Laravel 13, PHP 8.4 |
+| Panel administrativo | Filament 5 |
+| Base de datos | PostgreSQL en producción, SQLite en local |
+| Frontend público | Blade y Tailwind CSS 4, fuera de Filament |
+| Mapa | Leaflet con tiles grises de Esri, sin API key |
+| Gráficas | Chart.js |
+| Documentación de API | Scramble (OpenAPI generado desde los controladores) |
 
-## Learning Laravel
+El tablero público, el mapa, el reporte y la ficha de granja son vistas Blade propias. Filament se usa
+solo para el CRUD interno.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Requisitos
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.3 o superior con las extensiones `pdo_pgsql` o `pdo_sqlite`, `mbstring`, `intl`, `curl`, `zip`, `gd`
+- Composer 2
+- Node.js 20 o superior
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalación local
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <url-del-repositorio>
+cd generacion-solar
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate:fresh --seed
+npm run build
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+La aplicación queda en `http://127.0.0.1:8000`. Para desarrollo con recarga en caliente, `npm run dev`
+en otra terminal.
 
-## Contributing
+### Credenciales del panel
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Correo | Contraseña |
+|---|---|
+| `admin@solar.gt` | `password` |
 
-## Code of Conduct
+Se crean con el seeder y se pueden cambiar con `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el `.env`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Usar PostgreSQL en local
 
-## Security Vulnerabilities
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=generacion_solar
+DB_USERNAME=postgres
+DB_PASSWORD=secreto
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Comandos propios
 
-## License
+```bash
+php artisan solar:evaluar-alertas
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Recorre todas las generaciones registradas y reconstruye las alertas. Se usa después de una carga
+masiva de datos, porque las inserciones en bloque no disparan el observador de modelo.
+
+## Reglas de negocio
+
+Viven en [config/solar.php](config/solar.php) y no están escritas a mano en ningún otro archivo.
+
+| Constante | Valor | Significado |
+|---|---|---|
+| `factor_co2_kg_por_kwh` | 0.40 | Kilogramos de CO₂ evitados por kWh generado |
+| `umbral_alerta` | 0.80 | Se genera alerta si la generación real es igual o menor a este porcentaje de la esperada |
+| `meses_historicos_proyeccion` | 12 | Períodos que alimentan la regresión |
+| `min_periodos_regresion` | 3 | Con menos períodos se usa promedio en lugar de recta |
+
+## Modelo de datos
+
+```
+departamentos ──< granjas ──< granja_panel >── modelos_panel
+                     │
+                     ├──< generaciones ──< alertas
+                     └──< alertas
+```
+
+- `granjas` usa borrado lógico y una bandera `activa`: una granja se desactiva, nunca se borra.
+- `generaciones` guarda el período como el día 1 del mes y tiene índice único por granja y período.
+- `alertas` tiene índice único por generación, así que una generación produce como máximo una alerta.
+
+**Valores derivados, calculados y nunca almacenados:**
+
+| Valor | Cómo se obtiene |
+|---|---|
+| Capacidad instalada kW | Suma de `cantidad × potencia_kw` de los paneles de la granja |
+| Generación acumulada kWh | Suma de `generacion_real_kwh` de sus períodos |
+| CO₂ evitado kg | Generación acumulada × 0.40 |
+| Porcentaje de desviación | `(real − esperada) / esperada × 100` |
+
+Guardarlos como columnas introduciría riesgo de desincronización cada vez que cambian los paneles de
+una granja. El scope `Granja::conMetricas()` los resuelve con subconsultas, así que listar 35 granjas
+con sus métricas cuesta una sola consulta.
+
+## Alertas
+
+Un observador sobre `Generacion` evalúa cada guardado: si la generación real es igual o menor al 80%
+de la esperada, crea o actualiza la alerta; si deja de cumplirse, la elimina. El caso borde del 80%
+exacto sí genera alerta, porque el requisito pide alertar cuando la generación está "al menos 20% por
+debajo". Hay pruebas para 79%, 80% y 81% en `tests/Feature/AlertaTest.php`.
+
+## Proyección
+
+Regresión lineal por mínimos cuadrados sobre los últimos 12 períodos registrados. El detalle del
+método y su justificación están en [docs/API.md](docs/API.md#proyección) y en la ficha de cada granja,
+que muestra además la precisión histórica del modelo: qué habría proyectado con los datos previos de
+cada mes y el error contra el valor real.
+
+## Pruebas
+
+```bash
+php artisan test
+```
+
+17 pruebas cubren el umbral de alertas, la proyección (serie lineal, serie plana, pocos períodos, piso
+en cero, ventana configurable), las pantallas públicas, los endpoints de la API, los códigos 404 y 422
+y la suficiencia de los datos de demostración.
+
+## Despliegue
+
+Ver [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md).
+
+## Estructura
+
+```
+app/
+  Enums/                 Estados de panel y de alerta
+  Filament/              Recursos y widgets del panel interno
+  Http/Controllers/      PublicoController y Api/V1
+  Http/Resources/        API Resources
+  Models/                Departamento, ModeloPanel, Granja, GranjaPanel, Generacion, Alerta
+  Observers/             GeneracionObserver (dispara la evaluación de alertas)
+  Services/              AlertaService, EstadisticasService, ProyeccionService
+  Support/Formato.php    Formato de cifras y unidades
+database/seeders/        DepartamentoSeeder (los 22 reales) y DemoSeeder
+docs/                    Diseño, API, despliegue, uso de IA
+resources/views/publico/ Tablero, mapa, reporte, alertas y ficha de granja
+```
