@@ -251,6 +251,13 @@ async function mapa(el) {
     }
 }
 
+// Volver: historial real del navegador cuando existe; si no, el href (referer o tablero).
+document.querySelectorAll('[data-volver]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+        if (history.length > 1) { e.preventDefault(); history.back(); }
+    });
+});
+
 document.querySelectorAll('[data-mapa]').forEach(mapa);
 document.querySelectorAll('[data-banda]').forEach(bandaNacional);
 document.querySelectorAll('[data-grafica-granja]').forEach(graficaGranja);
