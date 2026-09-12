@@ -251,6 +251,19 @@ async function mapa(el) {
     }
 }
 
+// Menú hamburguesa en móvil: muestra u oculta la navegación.
+const botonMenu = document.querySelector('[data-menu]');
+const nav = document.querySelector('[data-nav]');
+botonMenu?.addEventListener('click', () => {
+    const abierto = !nav.classList.toggle('hidden');
+    nav.classList.toggle('flex', abierto); // columna en móvil; en escritorio sm:flex ya lo muestra
+    botonMenu.setAttribute('aria-expanded', String(abierto));
+    botonMenu.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
+    // Los SVG no tienen la propiedad .hidden; hay que tocar el atributo.
+    botonMenu.querySelector('[data-icono-abrir]').toggleAttribute('hidden', abierto);
+    botonMenu.querySelector('[data-icono-cerrar]').toggleAttribute('hidden', !abierto);
+});
+
 // Volver: historial real del navegador cuando existe; si no, el href (referer o tablero).
 document.querySelectorAll('[data-volver]').forEach((a) => {
     a.addEventListener('click', (e) => {

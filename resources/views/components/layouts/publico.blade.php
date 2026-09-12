@@ -11,16 +11,25 @@
 </head>
 <body class="min-h-screen bg-ground text-ink font-sans">
     <header class="border-b border-rule-strong bg-surface">
-        <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2 sm:h-14 sm:flex-row sm:items-center sm:gap-6 sm:py-0 sm:px-6">
-            <a href="{{ route('inicio') }}" class="shrink-0 whitespace-nowrap text-[15px] font-semibold text-ink no-underline">Generación solar · Guatemala</a>
-            <nav class="-mx-1 flex items-center gap-1 overflow-x-auto text-[13px] sm:ml-auto sm:mx-0" aria-label="Principal">
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center px-4 sm:h-14 sm:flex-nowrap sm:gap-6 sm:px-6">
+            <a href="{{ route('inicio') }}" class="h-14 shrink-0 whitespace-nowrap text-[15px] font-semibold leading-[56px] text-ink no-underline">Generación solar · Guatemala</a>
+
+            {{-- Hamburguesa: solo en móvil --}}
+            <button type="button" data-menu aria-expanded="false" aria-controls="nav-principal" aria-label="Abrir menú"
+                    class="ml-auto flex h-9 w-9 items-center justify-center rounded-control border border-rule-strong text-ink sm:hidden">
+                <svg data-icono-abrir width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.5"/></svg>
+                <svg data-icono-cerrar width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" hidden><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.5"/></svg>
+            </button>
+
+            <nav id="nav-principal" data-nav aria-label="Principal"
+                 class="hidden w-full flex-col gap-1 border-t border-rule py-2 text-[14px] sm:ml-auto sm:flex sm:w-auto sm:flex-row sm:items-center sm:border-0 sm:py-0 sm:text-[13px]">
                 @foreach ([['inicio', 'Tablero'], ['mapa', 'Mapa'], ['reporte', 'Reporte'], ['alertas', 'Alertas']] as [$ruta, $nombre])
                     <a href="{{ route($ruta) }}"
-                       class="shrink-0 px-3 py-1.5 no-underline rounded-control {{ request()->routeIs($ruta) ? 'bg-ground text-ink font-medium' : 'text-ink-2 hover:text-ink' }}"
+                       class="shrink-0 px-3 py-2 no-underline rounded-control sm:py-1.5 {{ request()->routeIs($ruta) ? 'bg-ground text-ink font-medium' : 'text-ink-2 hover:text-ink' }}"
                        @if(request()->routeIs($ruta)) aria-current="page" @endif>{{ $nombre }}</a>
                 @endforeach
-                <a href="/docs/api" class="shrink-0 px-3 py-1.5 text-ink-2 no-underline hover:text-ink">API</a>
-                <a href="/admin" class="ml-1 shrink-0 px-3 py-1.5 text-interactivo no-underline border border-rule-strong rounded-control hover:bg-ground sm:ml-2">Administración</a>
+                <a href="/docs/api" class="shrink-0 px-3 py-2 text-ink-2 no-underline hover:text-ink sm:py-1.5">API</a>
+                <a href="/admin" class="mt-1 shrink-0 px-3 py-2 text-interactivo no-underline border border-rule-strong rounded-control hover:bg-ground sm:ml-2 sm:mt-0 sm:py-1.5">Administración</a>
             </nav>
         </div>
     </header>
