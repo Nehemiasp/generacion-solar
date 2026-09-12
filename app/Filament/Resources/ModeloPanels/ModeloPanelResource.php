@@ -24,6 +24,8 @@ class ModeloPanelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'modelos de panel';
 
+    protected static ?string $navigationLabel = 'Modelos de panel';
+
     protected static ?string $slug = 'modelos-panel';
 
     protected static ?int $navigationSort = 2;

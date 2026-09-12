@@ -26,7 +26,8 @@ class GranjaController extends Controller
     {
         $datos = $request->validate([
             'departamento_id' => ['nullable', 'integer', 'exists:departamentos,id'],
-            'activa' => ['nullable', 'boolean'],
+            // acepta 1/0 y true/false, que es lo que manda un cliente HTTP típico
+            'activa' => ['nullable', 'in:0,1,true,false'],
             'buscar' => ['nullable', 'string', 'max:100'],
             'por_pagina' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
@@ -87,13 +88,14 @@ class GranjaController extends Controller
      */
     public function proyeccion(Granja $granja, Request $request, ProyeccionService $proyeccion): JsonResponse
     {
-        $meses = (int) $request->validate(['meses' => ['nullable', 'integer', 'min:1', 'max:12']])['meses'] ?? 3;
+        $datos = $request->validate(['meses' => ['nullable', 'integer', 'min:1', 'max:12']]);
+        $meses = (int) ($datos['meses'] ?? 3);
 
         return response()->json([
             'data' => [
                 'granja_id' => $granja->id,
                 'granja' => $granja->nombre,
-                'proyeccion' => $proyeccion->proyectar($granja, $meses ?: 3),
+                'proyeccion' => $proyeccion->proyectar($granja, $meses),
                 'precision_historica' => $proyeccion->compararProyeccionVsReal($granja),
             ],
         ]);

@@ -159,9 +159,13 @@ async function mapa(el) {
     const conLeyenda = el.dataset.leyenda !== 'no';
     const map = L.map(el, { zoomControl: true, attributionControl: true, scrollWheelZoom: el.dataset.rueda !== 'no' })
         .setView([15.6, -90.3], 7);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap, &copy; CARTO', subdomains: 'abcd', maxZoom: 18,
+    // Base monocroma sin API key (CARTO Positron pasó a exigir clave en 2025).
+    // Gris plano: los marcadores mandan, ninguna carretera de color compite con los datos.
+    const esri = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_';
+    L.tileLayer(`${esri}Base/MapServer/tile/{z}/{y}/{x}`, {
+        attribution: 'Esri, HERE, Garmin, &copy; OpenStreetMap', maxZoom: 16,
     }).addTo(map);
+    L.tileLayer(`${esri}Reference/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16, pane: 'shadowPane' }).addTo(map);
 
     const vacio = document.createElement('div');
     vacio.className = 'mapa-vacio';

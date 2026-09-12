@@ -12,6 +12,9 @@ class AlertasActivas extends TableWidget
 {
     protected static ?int $sort = 2;
 
+    // Se cargan con la página: el escritorio debe estar completo al primer vistazo.
+    protected static bool $isLazy = false;
+
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = 'Alertas activas más recientes';

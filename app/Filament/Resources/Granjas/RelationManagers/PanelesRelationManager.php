@@ -20,6 +20,9 @@ class PanelesRelationManager extends RelationManager
 
     protected static ?string $title = 'Paneles instalados';
 
+    // Sin carga diferida: la capacidad instalada es lo primero que se revisa en la ficha.
+    protected static bool $isLazy = false;
+
     protected static ?string $modelLabel = 'panel';
 
     public function form(Schema $schema): Schema

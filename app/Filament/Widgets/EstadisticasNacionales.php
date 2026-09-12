@@ -10,6 +10,9 @@ class EstadisticasNacionales extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
+    // Se cargan con la página: el escritorio debe estar completo al primer vistazo.
+    protected static bool $isLazy = false;
+
     protected function getStats(): array
     {
         $n = app(EstadisticasService::class)->nacional();
