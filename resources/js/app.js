@@ -16,7 +16,7 @@ const fmt = (n, dec = 0) => Number(n).toLocaleString('es-GT', { minimumFractionD
 const energia = (kwh) => kwh >= 1_000_000 ? `${fmt(kwh / 1_000_000, 2)} GWh` : `${fmt(kwh)} kWh`;
 const mes = (iso) => { const d = new Date(iso + 'T00:00:00'); return `${MESES[d.getMonth()]} ${d.getFullYear()}`; };
 
-// Quintiles: 4 cortes; mismo algoritmo que EstadisticasService::quintiles
+// Quintiles: 4 cortes
 function quintiles(valores) {
     const v = valores.filter((x) => x > 0).sort((a, b) => a - b);
     if (v.length < 5) { const m = v.length ? v[v.length - 1] : 1; return [0.2, 0.4, 0.6, 0.8].map((q) => m * q); }
@@ -24,7 +24,6 @@ function quintiles(valores) {
 }
 const quintil = (x, cortes) => cortes.reduce((q, c) => (x > c ? q + 1 : q), 0);
 
-// ---- Chart.js: configuración obligatoria del sistema ----
 const etiquetaFinal = {
     id: 'etiquetaFinal',
     afterDatasetsDraw(chart) {
@@ -77,7 +76,7 @@ const lineaEsperada = (label, data) => ({
     pointRadius: 0, etiqueta: 'esperada', etiquetaColor: T.ink3,
 });
 
-// Banda de irradiación: 12 meses como columnas coloreadas por la escala + línea esperada
+// Irradiación mensual: 12 meses como columnas coloreadas por la escala + línea esperada
 function bandaNacional(canvas) {
     const serie = JSON.parse(canvas.dataset.serie);
     const cortes = quintiles(serie.map((s) => s.real_kwh));
@@ -98,7 +97,7 @@ function bandaNacional(canvas) {
     });
 }
 
-// Ficha de granja: histórico real (sólida) + esperada (punteada) + proyección (punteada, prolonga la real)
+// Historial real (sólida) + esperada (punteada) + proyección (punteada, prolonga la real)
 function graficaGranja(canvas) {
     const hist = JSON.parse(canvas.dataset.historico);
     const proy = JSON.parse(canvas.dataset.proyeccion);
@@ -159,8 +158,7 @@ async function mapa(el) {
     const conLeyenda = el.dataset.leyenda !== 'no';
     const map = L.map(el, { zoomControl: true, attributionControl: true, scrollWheelZoom: el.dataset.rueda !== 'no' })
         .setView([15.6, -90.3], 7);
-    // Base monocroma sin API key (CARTO Positron pasó a exigir clave en 2025).
-    // Gris plano: los marcadores mandan, ninguna carretera de color compite con los datos.
+    // Base monocroma: los marcadores mandan, ninguna carretera de color compite con los datos.
     const esri = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_';
     L.tileLayer(`${esri}Base/MapServer/tile/{z}/{y}/{x}`, {
         attribution: 'Esri, HERE, Garmin, &copy; OpenStreetMap', maxZoom: 16,

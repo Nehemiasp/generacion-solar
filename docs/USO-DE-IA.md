@@ -27,9 +27,11 @@ Ambos permitieron que la verificación fuera sobre la aplicación desplegada y n
 
 ## Prompts
 
-Los prompts de cada fase de construcción están en [PLAN.md](PLAN.md) (secciones "FASE 1" a
-"FASE 7") y los de la conversación, en orden cronológico y con su contexto, en
-[PROMPTS.md](PROMPTS.md).
+Todos los prompts están documentados en [PROMPTS.md](PROMPTS.md), en orden cronológico y con el
+contexto y el resultado de cada uno. Se agrupan en siete etapas: preparación, construcción por
+fases, mapa, navegación y responsive, despliegue, verificación en producción, y documentación y
+entrega. Los prompts largos de cada fase de construcción viven en [PLAN.md](PLAN.md) (Fases 0 a 9);
+los de la conversación son cortos y remiten a la fase del plan o a la sección del diseño que aplica.
 
 ## Cómo se dirigió el trabajo
 
@@ -37,34 +39,55 @@ El proyecto lo desarrolló una sola persona (Nehemías Pérez Palma, carné 0909
 director del trabajo de la IA: definió qué construir, revisó cada resultado y tomó las decisiones
 listadas más abajo.
 
-Antes de escribir código se pidieron a la IA, a partir del PDF del reto, tres documentos que luego el
-equipo revisó y que la IA estaba obligada a respetar en todo el desarrollo:
+**Etapa de preparación.** Antes de escribir código se pidieron a la IA, a partir del PDF del reto, tres
+documentos (sección 0 de `PROMPTS.md`) que luego el equipo revisó y que la IA estaba obligada a
+respetar en todo el desarrollo:
 
 | Documento | Qué fija |
 |---|---|
-| `CLAUDE.md` | Reglas permanentes: dominio en español, nada de columnas para valores derivados, constantes desde `config/solar.php`, ejecutar el código antes de darlo por terminado |
-| `docs/PLAN.md` | Esquema de base de datos cerrado, fases de trabajo y criterios de aceptación |
-| `docs/DISENO.md` | Sistema de diseño vinculante: paleta, tipografía, densidad, prohibiciones |
+| `CLAUDE.md` | Reglas permanentes: dominio en español, nada de columnas para valores derivados, constantes desde `config/solar.php`, no inventar API de Filament, ejecutar el código antes de darlo por terminado |
+| `docs/PLAN.md` | Decisiones de stack, esquema de base de datos cerrado (sección 1), fases 0 a 9 con su prompt y su criterio de aceptación, lista de verificación contra los 17 RF |
+| `docs/DISENO.md` | Sistema de diseño vinculante: una sola escala de color, tipografía, densidad, mapa, gráficas, estados vacíos y lista de lo prohibido |
 
 Sin esos documentos, un agente produce el resultado promedio de internet: tarjetas con sombra,
 gradientes violetas, Inter y los colores por defecto de Chart.js. Con ellos, produce lo que el equipo
 decidió.
 
-El trabajo avanzó por fases, cada una con un objetivo único y su commit: andamiaje, modelo de datos,
-CRUDs, alertas, estadísticas, frontend público, API, datos de demostración y documentación.
+**Etapa de construcción.** Cada prompt de la conversación nombró las fases del plan que debía ejecutar
+y terminó en un commit, de modo que prompt y commit se pueden cruzar en el historial de GitHub:
+
+| Prompt (fases de `PLAN.md`) | Commit resultante |
+|---|---|
+| Fase 0 — andamiaje | `chore: proyecto inicial Laravel 13 + Filament 5 + Scramble` |
+| Fases 1, 3 y 6 — modelo de datos, alertas, proyección | `feat: modelo de datos, alertas (RF-14), proyección (RF-15) y datos demo` |
+| Fases 2, 4 y 7 — CRUDs, estadísticas, API | `feat: CRUDs Filament, API REST v1, servicios de estadisticas y frontend publico base` |
+| Fase 5 — frontend público según `DISENO.md` | `feat: frontend publico con mapa, tablero y proyeccion; correcciones de Filament y API` |
+| Fase 9 — documentación y responsive | `docs: README, API, despliegue y uso de IA; ajustes responsive` |
+| Presentación | `docs: presentacion de 11 diapositivas y capturas de la aplicacion` |
+
+Después vinieron los ajustes de navegación (Volver, menú móvil, encabezado fijo), el despliegue en
+Laravel Cloud, la verificación en producción y la documentación de entrega, cada uno con su commit.
+
+**Desviaciones del plan.** Tres, todas decididas por el equipo y registradas en el documento
+correspondiente: MySQL en lugar de PostgreSQL por el costo del recurso en Laravel Cloud (`PLAN.md`),
+mosaicos de Esri en lugar de CARTO porque CARTO exigía clave (`DISENO.md`, sección 15) y frontend
+público en Blade propio en lugar de widgets de Filament para poder cumplir el sistema de diseño.
 
 ## Dónde se usó
 
 | Fase | Aporte de la IA | Qué revisó y corrigió el equipo |
 |---|---|---|
-| Andamiaje | Instalación de PHP 8.4, Composer, Laravel 13, Filament 5 y Scramble | La instalación inicial de PHP no traía `intl` ni `pdo_pgsql`; se detectó al revisar `php -m` y se reinstaló desde la distribución oficial con un `php.ini` propio |
-| Modelo de datos | Migraciones, modelos, enums, casts y relaciones a partir del esquema ya definido | El esquema es decisión del equipo. Se verificó en tinker que los 22 departamentos cargan y que las coordenadas caen dentro de Guatemala |
-| CRUDs Filament | Recursos, formularios, tablas y el relation manager de paneles | Las firmas de Filament 5 se verificaron leyendo `vendor/filament` y los archivos que generan los comandos `make:`, no de memoria. Se corrigieron etiquetas, slugs y el formato numérico, que salía con punto de miles por el locale español |
-| Alertas | Observador, servicio, comando artisan y recurso de solo lectura | Se definió que el 80% exacto sí dispara alerta y se escribieron pruebas para 79%, 80% y 81% |
-| Proyección | Implementación de mínimos cuadrados y de la comparación contra datos reales | El método lo eligió el equipo. Se agregaron el piso en cero, el cambio de método con pocos períodos y las pruebas con serie lineal y serie plana |
-| Frontend público | Blade, Tailwind, Leaflet y Chart.js siguiendo `docs/DISENO.md` | Se probó a 375 px, se revisó que no hubiera desbordamiento horizontal y se ajustó el encabezado en móvil |
-| API REST | Controladores, API Resources, validación y anotaciones para Scramble | Se encontraron y corrigieron tres fallos reales al probar los endpoints: faltaba definir el limitador `api`, el parámetro `meses` reventaba si no venía, y el filtro `activa=true` no pasaba la validación booleana |
-| Datos de demostración | Seeder con estacionalidad, tendencias y granjas en bajo desempeño | Los parámetros los fijó el equipo: 35 granjas, 18 meses, 6 granjas con desempeño bajo sostenido, estacionalidad de verano seco |
+| 0 · Andamiaje | Instalación de PHP 8.4, Composer, Laravel 13, Filament 5 y Scramble | La instalación inicial de PHP no traía `intl` ni `pdo_pgsql`; se detectó al revisar `php -m` y se reinstaló desde la distribución oficial con un `php.ini` propio |
+| 1 · Modelo de datos | Migraciones, modelos, enums, casts y relaciones a partir del esquema de la sección 1 del plan | El esquema es decisión del equipo. Se verificó en tinker que los 22 departamentos cargan y que las coordenadas caen dentro de Guatemala (criterio de aceptación de la fase) |
+| 2 · CRUDs Filament | Recursos, formularios, tablas y el relation manager de paneles | Las firmas de Filament 5 se verificaron leyendo `vendor/filament` y los archivos que generan los comandos `make:`, no de memoria. Se corrigieron etiquetas, slugs y el formato numérico, que salía con punto de miles por el locale español |
+| 3 · Alertas | Observador, servicio, comando artisan y recurso de solo lectura | Se definió que el 80% exacto sí dispara alerta y se escribieron pruebas para 79%, 80% y 81% |
+| 4 · Tablero y reportes | Servicio de estadísticas con consultas agregadas y subconsultas para los valores derivados | Se comprobó que las cifras coinciden con consultas SQL directas y que listar 35 granjas con métricas cuesta una sola consulta |
+| 5 · Mapa y frontend público | Blade, Tailwind, Leaflet y Chart.js siguiendo las secciones 6 a 9 de `DISENO.md` | Se probó a 375 px, se revisó que no hubiera desbordamiento horizontal y se ajustó la navegación en móvil |
+| 6 · Proyección | Implementación de mínimos cuadrados y de la comparación contra datos reales | El método lo eligió el equipo. Se agregaron el piso en cero, el cambio de método con pocos períodos y las pruebas con serie lineal y serie plana |
+| 7 · API REST | Controladores, API Resources, validación y anotaciones para Scramble | Se encontraron y corrigieron tres fallos reales al probar los endpoints: faltaba definir el limitador `api`, el parámetro `meses` reventaba si no venía, y el filtro `activa=true` no pasaba la validación booleana |
+| 8 · Datos de demostración | Seeder con estacionalidad, tendencias y granjas en bajo desempeño | Los parámetros los fijó el equipo: 35 granjas, 18 meses, 6 granjas con desempeño bajo sostenido, estacionalidad de verano seco |
+| 9 · Documentación y presentación | README, API, despliegue, manual de usuario, diagrama ER, presentación y este documento | Se revisó cada afirmación contra el código y contra la aplicación desplegada |
+| Despliegue y verificación | Diagnóstico de los errores 500 y 403 de producción; recorrido de todas las pantallas en escritorio y móvil | El equipo operó Laravel Cloud, cargó las variables de entorno y ejecutó el seed; la IA verificó a través de los servidores MCP |
 
 ## Fallos de la IA que hubo que corregir
 
@@ -107,6 +130,8 @@ Se listan porque demuestran que el código generado se revisó en lugar de acept
   sombras, sin gradientes, con cifras tabulares y densidad de consola de operación.
 - **Los parámetros de los datos de demostración**, para que el tablero, el mapa, las alertas y las
   proyecciones cuenten una historia coherente.
+- **Las desviaciones del plan** (MySQL, mosaicos de Esri, Blade propio) y qué propuestas de la IA se
+  descartaron (esquinas redondeadas, por contradecir el sistema de diseño).
 
 ## Verificación
 
