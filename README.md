@@ -6,7 +6,7 @@ desempeño y proyección de generación futura.
 
 Competencia de Programación con IA, 11 y 12 de septiembre de 2026.
 
-- **URL pública:** [generacion-solar-production-gtqero.laravel.cloud](https://generacion-solar-production-gtqero.laravel.cloud)
+- **URL pública:** estuvo en Laravel Cloud durante la competencia (`generacion-solar-production-gtqero.laravel.cloud`); el entorno se dio de baja el 16 de septiembre de 2026 para no generar costo. Se vuelve a levantar con [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md)
 - **Repositorio:** [github.com/Nehemiasp/generacion-solar](https://github.com/Nehemiasp/generacion-solar)
 - **Panel de administración:** `/admin`
 - **Documentación de la API:** `/docs/api` (interactiva) y [docs/API.md](docs/API.md)

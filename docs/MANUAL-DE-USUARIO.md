@@ -6,8 +6,8 @@ La aplicación tiene dos partes: las **pantallas públicas**, que cualquiera pue
 cuenta, y el **panel de administración**, donde el personal autorizado registra granjas, paneles y
 generación mensual.
 
-- Sitio: https://generacion-solar-production-gtqero.laravel.cloud
-- Panel: https://generacion-solar-production-gtqero.laravel.cloud/admin
+- Sitio: la URL que indique el despliegue vigente (ver `DESPLIEGUE.md`); en local, `http://127.0.0.1:8000`
+- Panel: la misma URL seguida de `/admin`
 
 ## 1. Pantallas públicas
 

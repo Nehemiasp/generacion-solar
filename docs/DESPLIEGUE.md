@@ -1,6 +1,6 @@
 # Despliegue
 
-**Producción actual:** [https://generacion-solar-production-gtqero.laravel.cloud](https://generacion-solar-production-gtqero.laravel.cloud) en Laravel Cloud, región US East (Ohio), con Laravel MySQL 8.4
+**Producción durante la competencia:** `generacion-solar-production-gtqero.laravel.cloud` en Laravel Cloud, región US East (Ohio), con Laravel MySQL 8.4
 en configuración Dev y cómputo Flex con escala a cero. Cada `git push` a `main` despliega solo.
 
 La aplicación necesita PHP 8.3 o superior, MySQL o PostgreSQL y un paso de compilación de assets con Node.

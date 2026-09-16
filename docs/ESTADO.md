@@ -13,7 +13,7 @@ Nehemías Pérez Palma, carné 0909-26-9887.
 
 | Recurso | Ubicación |
 |---|---|
-| Producción | https://generacion-solar-production-gtqero.laravel.cloud (Laravel Cloud, MySQL 8.4 Dev, despliegue automático con cada push a `main`) |
+| Producción | Dada de baja el 16 de septiembre de 2026 (la competencia terminó). Estuvo en Laravel Cloud con MySQL 8.4 Dev; se relevanta con `docs/DESPLIEGUE.md` en unos 10 minutos |
 | Panel | `/admin` · `admin@solar.gt` / `Solar2026Gt` |
 | Repositorio | https://github.com/Nehemiasp/generacion-solar |
 | Documentación de la API | `/docs/api` (Scramble) · `/api` y `/api/v1` devuelven un índice JSON |
